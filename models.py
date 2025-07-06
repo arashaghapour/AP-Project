@@ -1,0 +1,43 @@
+from sqlalchemy import Column, Integer, String
+import database
+Base = database.Base
+class Cosmetics(Base):
+    __tablename__ = "Cosmetics"
+    id = Column(Integer, primary_key=True, index=True)
+    texture = Column(String)
+    spf = Column(String)
+    finish = Column(String)
+    skin_type = Column(String)
+    coverage = Column(String)
+    usage_ease = Column(String)
+    active_ingredients = Column(String)
+    application = Column(String)
+    base_color = Column(String)
+    has_shades = Column(String)
+    durability = Column(String)
+    volume_ml = Column(Integer)
+    container_type = Column(String)
+    brand = Column(String)
+    country_of_origin = Column(String)
+class skin_care(Base):
+    __tablename__ = "skin_care"
+    id = Column(Integer, primary_key=True, index=True)
+    product_type = Column(String)
+    color_options = Column(String)
+    skin_type = Column(String)
+    spf = Column(Integer)
+    uv_protection_uva = Column(String)
+    uv_protection_uvb = Column(String)
+    volume_g = Column(Integer)
+    suitable_for = Column(String)
+    age_group = Column(String)
+    application_area = Column(String)
+    active_ingredients = Column(String)
+    features = Column(String)
+    container_type = Column(String)
+    brand = Column(String)
+    brand_origin = Column(String)
+    manufacturer = Column(String)
+    country_of_manufacture = Column(String)
+    other_features = Column(String)
+    ingredients = Column(String)
