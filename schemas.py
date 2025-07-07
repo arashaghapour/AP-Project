@@ -1,21 +1,24 @@
 from pydantic import BaseModel
+from typing import List
 class Cosmetics_input(BaseModel):
+    id: int
     texture: str
-    spf : str
-    finish : str
-    skin_type : str
-    coverage : str
-    usage_ease : str
-    active_ingredients : str
-    application : str
-    base_color : str
-    has_shades : str
-    durability : str
-    volume_ml : str
-    container_type : str
-    brand : str
-    country_of_origin : str
+    spf: str
+    finish: str
+    skin_type: str
+    coverage: str
+    usage_ease: str
+    active_ingredients: str
+    application: str
+    base_color: str
+    has_shades: str
+    durability: str
+    volume_ml: str
+    container_type: str
+    brand: str
+    country_of_origin: str
 class skin_care_input(BaseModel):
+    id: int
     product_type: str
     color_options: str
     skin_type: str
@@ -32,6 +35,9 @@ class skin_care_input(BaseModel):
     brand: str
     brand_origin: str
     manufacturer: str
-    country_of_manufacture: str
+    country_of_origin: str
     other_features: str
     ingredients: str
+class SearchResponse(BaseModel):
+    cosmetics: List[Cosmetics_input]
+    skin_care: List[skin_care_input]

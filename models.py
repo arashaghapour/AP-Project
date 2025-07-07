@@ -38,6 +38,6 @@ class skin_care(Base):
     brand = Column(String)
     brand_origin = Column(String)
     manufacturer = Column(String)
-    country_of_manufacture = Column(String)
+    country_of_origin = Column(String)
     other_features = Column(String)
     ingredients = Column(String)
