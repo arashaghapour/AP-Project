@@ -1,43 +1,62 @@
 from pydantic import BaseModel
-from typing import List
-class Cosmetics_input(BaseModel):
-    id: int
-    texture: str
-    spf: str
-    finish: str
-    skin_type: str
-    coverage: str
-    usage_ease: str
-    active_ingredients: str
-    application: str
-    base_color: str
-    has_shades: str
-    durability: str
-    volume_ml: str
-    container_type: str
+from typing import Optional, List
+from datetime import date
+from enum import Enum
+
+class SkinTypeAllowed(str, Enum):
+    oily = 'oily'
+    dry = 'dry'
+    sensitive = 'sensitive'
+    combination = 'combination'
+
+class CategoryAllowed(str, Enum):
+    cleanser = 'cleanser'
+    serum = 'serum'
+    moisturizer = 'moisturizer'
+
+class InteractionTypeAllowed(str, Enum):
+    view = 'view'
+    like = 'like'
+    wishlist = 'wishlist'
+    cart = 'cart'
+
+class UserCreate(BaseModel):
+    user_id: int
+    skin_type: SkinTypeAllowed
+    concers: dict
+    preferences: dict
+    devise: str
+    created_at: date
+
+class ProductCreate(BaseModel):
+    product_id: int
+    name: str
     brand: str
-    country_of_origin: str
-class skin_care_input(BaseModel):
-    id: int
-    product_type: str
-    color_options: str
-    skin_type: str
-    spf: str
-    uv_protection_uva: str
-    uv_protection_uvb: str
-    volume_g: str
-    suitable_for: str
-    age_group: str
-    application_area: str
-    active_ingredients: str
-    features: str
-    container_type: str
-    brand: str
-    brand_origin: str
-    manufacturer: str
-    country_of_origin: str
-    other_features: str
-    ingredients: str
-class SearchResponse(BaseModel):
-    cosmetics: List[Cosmetics_input]
-    skin_care: List[skin_care_input]
+    category: CategoryAllowed
+    skin_types: dict
+    concerns_targeted: dict
+    ingredients: dict
+    price: int
+    rating: float
+
+class BrowsingHistoryCreate(BaseModel):
+    user_id: int
+    product_id: int
+    timestamp: date
+    interaction_type: InteractionTypeAllowed
+
+class PurchaseHistoryCreate(BaseModel):
+    user_id: int
+    product_id: int
+    quantity: int
+    timestamp: date
+
+class ContextualSignalCreate(BaseModel):
+    user_id: int
+    timestamp: date
+    device_type: str
+    season: str
+    
+class LoginRequest(BaseModel):
+    user_id: int
+    devise: str
