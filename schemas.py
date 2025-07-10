@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import date
 from enum import Enum
+from datetime import datetime
 
 class SkinTypeAllowed(str, Enum):
     oily = 'oily'
@@ -9,6 +10,9 @@ class SkinTypeAllowed(str, Enum):
     sensitive = 'sensitive'
     combination = 'combination'
 
+class concersAllowed(str, Enum):
+    acne = 'acne'
+    dullness = 'dullness'
 class CategoryAllowed(str, Enum):
     cleanser = 'cleanser'
     serum = 'serum'
@@ -22,11 +26,12 @@ class InteractionTypeAllowed(str, Enum):
 
 class UserCreate(BaseModel):
     user_id: int
+    password: str
     skin_type: SkinTypeAllowed
     concers: dict
     preferences: dict
     devise: str
-    created_at: date
+    created_at: datetime
 
 class ProductCreate(BaseModel):
     product_id: int
@@ -42,21 +47,25 @@ class ProductCreate(BaseModel):
 class BrowsingHistoryCreate(BaseModel):
     user_id: int
     product_id: int
-    timestamp: date
+    timestamp: datetime
     interaction_type: InteractionTypeAllowed
 
 class PurchaseHistoryCreate(BaseModel):
     user_id: int
     product_id: int
     quantity: int
-    timestamp: date
+    timestamp: datetime
 
 class ContextualSignalCreate(BaseModel):
     user_id: int
-    timestamp: date
+    timestamp: datetime
     device_type: str
     season: str
     
 class LoginRequest(BaseModel):
     user_id: int
-    devise: str
+    password: str
+
+class Admin(BaseModel):
+    user_id: int
+    password: str
