@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer,DateTime, JSON, String, Enum as SqllEnum, Float
+from sqlalchemy import Column, Integer,DateTime, JSON, String, Enum as SqllEnum, Float, func
 from sqlalchemy.ext.declarative import declarative_base
 import database
 from datetime import datetime
@@ -55,7 +55,7 @@ class Purchase_History(Base):
     user_id = Column(Integer, primary_key=True)
     product_id = Column(Integer)
     quantity = Column(Integer)
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime, default=datetime.utcnow)
 class Contextual_Signals(Base):
     __tablename__ = 'Contextual_Signals'
     user_id = Column(Integer, primary_key=True)

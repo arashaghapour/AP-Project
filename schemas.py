@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import date
 from enum import Enum
@@ -62,9 +62,11 @@ class PurchaseHistoryCreate(BaseModel):
     user_id: int
     product_id: int
     quantity: int
-    timestamp: datetime
+    timestamp: Optional[datetime] = Field(default_factory=datetime.utcnow)
 
-
+class Purchase_input(BaseModel):
+    product_id: int
+    quantity: int
 class ContextualSignalCreate(BaseModel):
     user_id: int
     timestamp: datetime
