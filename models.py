@@ -44,6 +44,8 @@ class Products(Base):
     price = Column(Integer)
     rating = Column(Float)
 
+
+
 class Browsing_History(Base):
     __tablename__ = "Browsing_History"
     user_id = Column(Integer, primary_key=True)

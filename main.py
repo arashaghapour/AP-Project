@@ -7,6 +7,7 @@ from token_utils import create_access_token
 from dependencies import get_current_user, admin_required
 from fastapi.security import HTTPBearer
 from token_utils import create_access_token
+from typing import List
 
 
 Base.metadata.create_all(bind=engine)
@@ -48,7 +49,7 @@ def Review_user(user: schemas.LoginRequest, db: Session = Depends(get_db)):
     raise HTTPException(status_code=401, detail="Invalid credentials")
     
 @app.post("/add_product", response_model=schemas.ProductCreate)
-def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db), admin=Depends(admin_required)):
+def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     product_data = product.dict()
     new_product = models.Products(**product_data)
     db.add(new_product)
@@ -56,13 +57,14 @@ def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)
     db.refresh(new_product)
     return Response(content='product created', status_code=201)
 
-@app.get("/all_products", response_model=schemas.ProductCreate)
-def get_all_products(user=Depends(get_current_user), db: Session = Depends(get_db)):
+@app.get("/all_products", response_model=List[schemas.ProductCreate])
+def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
+    print(products)
     return products
 
 @app.post("/shopping", response_model=schemas.PurchaseHistoryCreate)
-def Product_Create(product: schemas.Purchase_input, db: Session = Depends(get_db), user=Depends(get_current_user)):
+def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     global user_in_code
     product_data = product.dict()
     new_product_data = {'user_id': user_in_code, 'product_id': product_data['product_id'], 'quantity': product_data['quantity']}
@@ -73,6 +75,10 @@ def Product_Create(product: schemas.Purchase_input, db: Session = Depends(get_db
     return Response(content='You will be happy you chose us', status_code=201)
 
 
+@app.post("/search", response_model=schemas.ProductCreate)
+def serch_input(serch: schemas.Search, db: Session = Depends(get_db)):
+    
+    return None
 # @app.post("/add_admin", response_model=schemas.Admin)
 # def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
 #     user_data = user.dict()

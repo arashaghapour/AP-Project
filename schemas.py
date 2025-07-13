@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import date
 from enum import Enum
 from datetime import datetime
@@ -41,14 +41,27 @@ class UserCreate(BaseModel):
 
 class ProductCreate(BaseModel):
     product_id: int
-    name: str
     brand: str
     category: CategoryAllowed
-    skin_types: dict
-    concerns_targeted: dict
-    ingredients: dict
+    skin_types: List[SkinTypeAllowed]
+    concerns_targeted: List[str]
+    ingredients: List[str]
     price: int
     rating: float
+
+# class ProductOut(BaseModel):
+#     product_id: int
+#     name: str
+#     brand: str
+#     category: CategoryAllowed
+#     skin_types: Dict[str, bool]
+#     concerns_targeted: Dict[str, bool]
+#     ingredients: Dict[str, str]
+#     price: int
+#     rating: float
+
+    class Config:
+        orm_mode = True
 
 
 class BrowsingHistoryCreate(BaseModel):
@@ -87,3 +100,7 @@ class Admin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    
+    
+class Search(BaseModel):
+    search: str
