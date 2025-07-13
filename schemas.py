@@ -49,19 +49,9 @@ class ProductCreate(BaseModel):
     price: int
     rating: float
 
-# class ProductOut(BaseModel):
-#     product_id: int
-#     name: str
-#     brand: str
-#     category: CategoryAllowed
-#     skin_types: Dict[str, bool]
-#     concerns_targeted: Dict[str, bool]
-#     ingredients: Dict[str, str]
-#     price: int
-#     rating: float
 
-    class Config:
-        orm_mode = True
+class Product_out(BaseModel):
+    items = List[ProductCreate]
 
 
 class BrowsingHistoryCreate(BaseModel):

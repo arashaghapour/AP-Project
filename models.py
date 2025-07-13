@@ -50,7 +50,7 @@ class Browsing_History(Base):
     __tablename__ = "Browsing_History"
     user_id = Column(Integer, primary_key=True)
     product_id = Column(Integer)
-    timestamp = Column(DateTime)
+    timestamp = Column(DateTime, default=datetime.utcnow)
     interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False)
 class Purchase_History(Base):
     __tablename__ = 'Purchase_History'
@@ -64,4 +64,4 @@ class Contextual_Signals(Base):
     timestamp = Column(DateTime)
     device_type = Column(String)
     season = Column(String)
-    
+

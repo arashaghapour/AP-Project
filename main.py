@@ -8,6 +8,7 @@ from dependencies import get_current_user, admin_required
 from fastapi.security import HTTPBearer
 from token_utils import create_access_token
 from typing import List
+from search import serch_in_database
 
 
 Base.metadata.create_all(bind=engine)
@@ -33,7 +34,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/login", response_model=schemas.Token)
-def Review_user(user: schemas.LoginRequest, db: Session = Depends(get_db)):
+def review_user(user: schemas.LoginRequest, db: Session = Depends(get_db)):
     global user_in_code
     user_review = db.query(models.Users).filter(models.Users.user_id == user.user_id).first()
     admin_review = db.query(models.Admins).filter(models.Admins.user_id == user.user_id).first()
@@ -60,8 +61,17 @@ def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)
 @app.get("/all_products", response_model=List[schemas.ProductCreate])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
-    print(products)
-    return products
+    brows_create = {}
+    for i in products:
+        i = i.__dict__
+        brows_create['user_id'] = user_in_code
+        brows_create['product_id'] = i['product_id']
+        brows_create['interaction_type'] = 'view'
+        new_product = models.Browsing_History(brows_create)
+        db.add(new_product)
+        db.commit()
+        db.refresh(new_product)
+        return products
 
 @app.post("/shopping", response_model=schemas.PurchaseHistoryCreate)
 def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
@@ -77,8 +87,11 @@ def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
 
 @app.post("/search", response_model=schemas.ProductCreate)
 def serch_input(serch: schemas.Search, db: Session = Depends(get_db)):
-    
-    return None
+    products = db.query(models.Products).all()
+    serach_result = serch_in_database(products, serch.search)
+    return serach_result
+
+
 # @app.post("/add_admin", response_model=schemas.Admin)
 # def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
 #     user_data = user.dict()
@@ -88,3 +101,5 @@ def serch_input(serch: schemas.Search, db: Session = Depends(get_db)):
 #     db.commit()
 #     db.refresh(new_user)
 #     return Response(content='admin created', status_code=201)
+
+
