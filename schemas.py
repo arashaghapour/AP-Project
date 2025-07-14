@@ -41,8 +41,9 @@ class UserCreate(BaseModel):
 
 class ProductCreate(BaseModel):
     product_id: int
+    name: str
     brand: str
-    category: CategoryAllowed
+    category: List[CategoryAllowed]
     skin_types: List[SkinTypeAllowed]
     concerns_targeted: List[str]
     ingredients: List[str]
