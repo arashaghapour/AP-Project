@@ -88,7 +88,41 @@ def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
 @app.post("/search", response_model=schemas.ProductCreate)
 def serch_input(serch: schemas.Search, db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
-    serach_result = serch_in_database(products, serch.search)
+    product_list = []
+    purchase_list = []
+    browsed = []
+    for product in products:
+        product_dict = {
+            "product_id": product.product_id,
+            "name": product.name,
+            "price": product.price,
+            'brand': product.brand,
+            'category': product.category,
+            'skin_types': product.skin_types,
+            'concerns_targeted': product.concerns_targeted,
+            'ingredients': product.ingredients,
+            "price": product.price,
+            'rating': product.rating
+        }
+        product_list.append(product_dict)
+    purchase = db.query(models.Purchase_History).all()
+    for items in purchase:
+        purchase_dict = {
+            "user_id": items.user_id,
+            "product_id": items.product_id,
+            "quantity": items.quantity,
+            'timestamp': items.timestamp            
+        }
+        purchase_list.append(purchase_dict)
+    searches = db.query(models.Browsing_History).all()
+    for items in searches:
+        search_dict = {
+            "user_id": items.user_id,
+            "product_id": items.product_id,
+            'timestamp': items.timestamp            
+        }
+        browsed.append(search_dict)
+    serach_result = serch_in_database(user_in_code, roduct_list, serch.search, purchase_list, browsed)
     return serach_result
 
 
