@@ -38,7 +38,7 @@ class Users(Base):
 
 
 class Admins(Base):
-    __tablename__ = "Admins"
+    __tablename__  = "Admins"
     user_id = Column(Integer, primary_key=True)
     password = Column(String, primary_key=True)
     

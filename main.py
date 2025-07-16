@@ -95,7 +95,6 @@ def serch_input(serch: schemas.Search, db: Session = Depends(get_db)):
         product_dict = {
             "product_id": product.product_id,
             "name": product.name,
-            "price": product.price,
             'brand': product.brand,
             'category': product.category,
             'skin_types': product.skin_types,
