@@ -136,4 +136,3 @@ def serch_input(serch: schemas.Search, db: Session = Depends(get_db)):
 #     db.refresh(new_user)
 #     return Response(content='admin created', status_code=201)
 
-
