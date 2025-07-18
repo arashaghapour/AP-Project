@@ -50,9 +50,21 @@ class ProductCreate(BaseModel):
     price: int
     rating: float
 
+class Product_out1(BaseModel):
+    product_id: int
+    name: str
+    brand: str
+    category: List[str]
+    skin_type: List[str]
+    concerns_targeted: List[str]
+    ingredients: List[str]
+    price: int
+    rating: float
+    response: str
 
-class Product_out(BaseModel):
-    items = List[ProductCreate]
+
+class Product_out2(BaseModel):
+    items: List[Product_out1]
 
 
 class BrowsingHistoryCreate(BaseModel):

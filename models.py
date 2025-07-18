@@ -59,7 +59,8 @@ class Products(Base):
 
 class Browsing_History(Base):
     __tablename__ = "Browsing_History"
-    user_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer)
     product_id = Column(Integer)
     timestamp = Column(DateTime, default=datetime.utcnow)
     interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False)
@@ -67,7 +68,8 @@ class Browsing_History(Base):
 
 class Purchase_History(Base):
     __tablename__ = 'Purchase_History'
-    user_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer)
     product_id = Column(Integer)
     quantity = Column(Integer)
     timestamp = Column(DateTime, default=datetime.utcnow)
