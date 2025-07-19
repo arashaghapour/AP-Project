@@ -127,7 +127,18 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
             'timestamp': items.timestamp            
         }
         browsed.append(search_dict)
-    search_result = search_in_database(user_in_code, product_list, search.search, purchase_list, browsed)
+    users_dict = {}
+    all_users = []
+    users = db.query(models.Users).all()
+    for user in users:
+        users_dict = {
+            'user_id': user.user_id,
+            'skin_type': user.skin_type,
+            'consers': user.concers
+        }
+        all_users.append(users_dict)
+
+    search_result = search_in_database(user_in_code, product_list, search.search, purchase_list, browsed, all_users)
     browse_create = {}
     for items in search_result['items']:
         browse_create['user_id'] = user_in_code
