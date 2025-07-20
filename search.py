@@ -1,11 +1,11 @@
 def search_in_database(user_in_code, products, searched_item, purchase, browsed, users):
     products_scores = {}    
-    parameters_score = {'concers': 85, 'category': 75, 'views':63,'searched_box': 120,
+    parameters_score = {'concerns': 85, 'category': 75, 'views':63,'searched_box': 120,
                         'rating': 51, 'name': 110, 'brand': 105, 
                         'purchase': 41,'searched': 11, 'close': 31,
                         'most_view': 53, 'skin_type': 90}
     
-    concers_labels = {'acne': 10,'combination': 12 ,'dullness': 14}
+    concerns_labels = {'acne': 10,'combination': 12 ,'dullness': 14}
     category = {'cleanser': 10, 'moisturizer': 12, 'serum': 20}
     skin_types = {'oily': 10, 'dry': 40, 'sensitive': 70, 'combination': 25}
     reasons_of_parameters = {
@@ -13,7 +13,7 @@ def search_in_database(user_in_code, products, searched_item, purchase, browsed,
         parameters_score['name']: 'Your search exactly matched the product name.',
         parameters_score['brand']: 'You searched for this brand.',
         parameters_score['category']: 'You searched for this product category.',
-        parameters_score['concers']: 'You searched for this product concern (like acne, dullness, etc).',
+        parameters_score['concerns']: 'You searched for this product concern (like acne, dullness, etc).',
         parameters_score['rating']: 'This product has a high average user rating.',
         parameters_score['purchase']: 'You have purchased this product before.',
         parameters_score['close']: 'This product is similar to what you searched for.',
@@ -40,128 +40,88 @@ def search_in_database(user_in_code, products, searched_item, purchase, browsed,
             if i['product_id'] == int(searched_item):
                 id_exist = True
                 products_scores[i['product_id']].append(parameters_score['searched_box'])
-                for j in purchase:
-                    if j['user_id'] == user_in_code:
-                        products_scores[j['product_id']].append(j['quantity'] * parameters_score['purchase'])
         except:
             pass
-
-
         if i['name'] == searched_item:
             products_scores[i['product_id']].append(parameters_score['searched_box'])
             exist = True
-            for j, k in concers_labels.items():
-                if i['concerns_targeted'][0] in concers_labels.keys():
-                    if abs(concers_labels[i['concerns_targeted'][0]] - k) < 3:
-                        for l in products:
-                            if l['concerns_targeted'] == j:
-                                products_scores[i['product_id']].append(parameters_score['close'])
-            
-            
-            for j, k in category.items():
-                if i['category'][0] in category.keys():
-                    if abs(category[i['category'][0]] - k) < 3:
-                        for l in products:
-                            if l['category'] == j:
-                                products_scores[i['product_id']].append(parameters_score['close'])
-
-            for j in purchase:
-                if j['user_id'] == user_in_code:
-                    products_scores[j['product_id']].append(j['quantity'] * parameters_score['purchase'])
-
-            for user in users:
-                if user['user_id'] == user_in_code:
-                    for product in products:
-                        if product['skin_type'] == user['skin_type']:
-                            products_scores[product['product_id']].append(parameters_score['skin_type'])
 
         elif i['brand'] == searched_item:
             exist = True
-            for item in users:
-                if item['user_id'] == user_in_code:
-                    if i['skin_type'] == item['skin_type']:
-                        products_scores[i['product_id']].append(parameters_score['searched_box'])
-        elif i['concerns_targeted'] == searched_item:
+            products_scores[i['product_id']].append(parameters_score['brand'])
+
+        elif i['concerns_targeted'][0] == searched_item:
             exist = True
-            for j in products:
-                if j['skin_type'] == users:
-                    products_scores[j['product_id']].append(parameters_score['brand'])
+            products_scores[i['product_id']].append(parameters_score['concerns'])
+
         elif i['category'][0] == searched_item:
             exist = True
             products_scores[i['product_id']].append(parameters_score['searched_box'])
-            for user in users:
-                if user['user_id'] == user_in_code:
-                    for product in products:
-                        if product['skin_type'] == user['skin_type']:
-                            products_scores[product['product_id']].append(parameters_score['skin_type'])
-
-            for item in products:
-                if item['category'] == searched_item:
-                    products_scores[item['product_id']].append(parameters_score['searched_box'])
-            for j, k in category.items():
-                if i['category'][0] in category.keys():
-                    if abs(category[i['category'][0]] - k) < 3:
-                        for l in products:
-                            if l['category'] == j:
-                                products_scores[i['product_id']].append(parameters_score['close'])
-
-            for j in purchase:
-                if j['user_id'] == user_in_code:
-                    products_scores[j['product_id']].append(j['quantity'] * parameters_score['purchase'])
 
         elif i['skin_type'][0] == searched_item:
             exist = True
             products_scores[i['product_id']].append(parameters_score['searched_box'])
-            for j, k in concers_labels.items():
-                if i['concerns_targeted'][0] in concers_labels.keys():
-                    if abs(concers_labels[i['concerns_targeted'][0]] - k) < 3:
-                        for l in products:
-                            if l['concerns_targeted'] == j:
-                                products_scores[i['product_id']].append(parameters_score['close'])
 
-            for j, k in skin_types.items():
-                if i['skin_type'][0] in skin_types.keys():
-                    if abs(skin_types[i['skin_type'][0]] - k) < 30:
-                        for l in products:
-                            if l['skin_type'] == j:
-                                products_scores[i['product_id']].append(parameters_score['close'])
-            for j in purchase:
-                if j['user_id'] == user_in_code:
-                    products_scores[j['product_id']].append(j['quantity'] * parameters_score['purchase'])
+    for user in users:
+        if user['user_id'] == user_in_code:
+            for product in products:
+                if product['skin_type'] == user['skin_type']:
+                    products_scores[product['product_id']].append(parameters_score['skin_type'])
+            break
+    for j in purchase:
+        if j['user_id'] == user_in_code:
+            products_scores[j['product_id']].append(j['quantity'] * parameters_score['purchase'])
+    list_of_products = []
+    for id, scores_list in products_scores.items():
+        list_of_products.append([id, sum(scores_list)])
+    list_of_products.sort(key=lambda item: item[1], reverse=True)
+    first_product = list_of_products[0][0]
+    for product in products:
+        if product['product_id'] == first_product:
+            for parameters, values in skin_types.items():
+                if abs(values - skin_types[product['skin_type'][0]]) < 30:
+                    for l in products:
+                        if l['skin_type'] == parameters:
+                            products_scores[l['product_id']].append(parameters_score['close'])
 
-            for user in users:
-                if user['user_id'] == user_in_code:
-                    for product in products:
-                        if product['skin_type'] == user['skin_type']:
-                            products_scores[product['product_id']].append(parameters_score['skin_type'])
+            for parameters, values in category.items():
+                if abs(values - category[product['category'][0]]) < 3:
+                    for l in products:
+                        if l['category'] == parameters:
+                            products_scores[l['product_id']].append(parameters_score['close'])
+            break
     if id_exist or exist:
         for id, scores_list in products_scores.items():
             for item_id, view in views:
                 if item_id == id:
                     scores_list.append(parameters_score['searched'] * view)
         products_scores[views[0][0]].append(parameters_score['most_view'])
-
+        print(products_scores)
         for id, scores_list in products_scores.items():
             for item in products:
                 if item['product_id'] == id:
                     products_scores[item['product_id']].append(parameters_score['rating'])
-
         list_of_products = []
         for id, scores_list in products_scores.items():
             list_of_products.append([id, sum(scores_list)])
-
         list_of_products.sort(key=lambda item: item[1], reverse=True)
+        print(products_scores)
         if len(list_of_products) > 1:
-            for item in range(len(list_of_products) - 1):
+            for item in range(len(list_of_products)):
                 first_item = None
                 second_item = None
                 for j in products:
                     if j['product_id'] == list_of_products[item][0]:
                         first_item = j['product_id']
-                    if j['product_id'] == list_of_products[item + 1][0]:
-                        second_item = j['product_id']
+                    if item != len(list_of_products) - 1:
+                        if j['product_id'] == list_of_products[item + 1][0]:
+                            second_item = j['product_id']
+                # parameters_score = {'concerns': 85, 'category': 75, 'views': 63, 'searched_box': 120,
+                #                     'rating': 51, 'name': 110, 'brand': 105,
+                #                     'purchase': 41, 'searched': 11, 'close': 31,
+                #                     'most_view': 53, 'skin_type': 90}
                 for j in products_scores[first_item]:
-                    if j not in products_scores[second_item]:
+                    if second_item == None or  j not in products_scores[second_item]:
                         if j % parameters_score['searched_box'] == 0:
                             list_of_products[item].append(reasons_of_parameters[parameters_score['searched_box']])
                         elif j % parameters_score['name'] == 0:
@@ -180,18 +140,27 @@ def search_in_database(user_in_code, products, searched_item, purchase, browsed,
                             list_of_products[item].append(reasons_of_parameters[parameters_score['purchase']])
                         elif j % parameters_score['searched'] == 0:
                             list_of_products[item].append(reasons_of_parameters[parameters_score['searched']])
+                        elif j % parameters_score['close'] == 0:
+                            list_of_products[item].append(reasons_of_parameters[parameters_score['close']])
+                        elif j % parameters_score['concerns'] == 0:
+                            list_of_products[item].append(reasons_of_parameters[parameters_score['concerns']])
+                        elif j % parameters_score['views'] == 0:
+                            list_of_products[item].append(reasons_of_parameters[parameters_score['views']])
                         break
                     else:
                         for parameter, value in parameters_score.items():
                             if value == max(products_scores[list_of_products[-1][0]]) or max(products_scores[list_of_products[-1][0]]) % value == 0:
                                 list_of_products[-1].append(reasons_of_parameters[value])
                                 break
+
         else:
             for parameter, value in parameters_score.items():
                 if value == max(products_scores[list_of_products[-1][0]]) or max(products_scores[list_of_products[-1][0]]) % value == 0:
                     list_of_products[-1].append(reasons_of_parameters[value])
         print(list_of_products)
         for item in list_of_products:
+            if item[1] == 0:
+                continue
             for item_list_search in products:
                 if item_list_search['product_id'] == item[0]:
                     item_of_product = {
@@ -220,5 +189,3 @@ def search_in_database(user_in_code, products, searched_item, purchase, browsed,
                            'price': 0,
                            'rating': 0.0,
                            'response': 'we dont have product for your search.'}]}
-
-
