@@ -140,6 +140,9 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
 
     search_result = search_in_database(user_in_code, product_list, search.search, purchase_list, browsed, all_users)
     browse_create = {}
+    count1 = 0
+    count2 = 0
+    submit_list = []
     for items in search_result['items']:
         browse_create['user_id'] = user_in_code
         browse_create['product_id'] = items['product_id']
@@ -148,7 +151,15 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
         db.add(new_browse)
         db.commit()
         db.refresh(new_browse)
-    return search_result
+        count1 += 1
+        if count1 == 3:
+            break
+    for items in search_result['items']:
+        submit_list.append(items)
+        count2 += 1
+        if count2 == 3:
+            break
+    return {'items': submit_list}
 
 
 # @app.post("/add_admin", response_model=schemas.Admin)
