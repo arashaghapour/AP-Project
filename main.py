@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-import schemas, models
-from database import Base, engine, get_db
+from . import schemas, models
+from .database import Base, engine, get_db
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer
-from token_utils import create_access_token
+from .token_utils import create_access_token
 from typing import List
-from search import search_in_database
+from .search import search_in_database
 
 
 Base.metadata.create_all(bind=engine)
