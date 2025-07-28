@@ -30,14 +30,14 @@ class Users(Base):
     user_id = Column(Integer, primary_key=True)
     name = Column(String)
     email = Column(String)
-    password = Column(String, primary_key=True)
+    password = Column(String)
     skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
     concers = Column(JSON)
     preferences = Column(JSON)
     device_type = Column(String)
     created_at = Column(DateTime)
 
-    browsing = relationship('Browsing_History', 'user')
+    browsing = relationship('Browsing_History', back_populates='user')
     quiz = relationship('Quiz_result', back_populates= 'user2')
     # purchasing = relationship('Purchase_History', 'user2')
 
@@ -74,7 +74,7 @@ class Quiz_result(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 
-    user2 = relationship('User', back_populates= 'quiz')
+    user2 = relationship('Users', back_populates= 'quiz')
 
 class Routine_Plans(Base):
     __tablename__ = "Routine_Plans"
@@ -93,7 +93,7 @@ class Browsing_History(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False)
 
-    user = relationship('User', back_populates= 'browsing')
+    user = relationship('Users', back_populates= 'browsing')
     # purchasing2 = relationship('Purchase_History', 'browsing2')
 
 class Purchase_History(Base):
