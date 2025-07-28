@@ -162,13 +162,13 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
     return {'items': submit_list}
 
 
-# @app.post("/add_admin", response_model=schemas.Admin)
-# def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
-#     user_data = user.dict()
-#     user_data["password"] = pwd_context.hash(user.password)
-#     new_user = models.Admins(**user_data)
-#     db.add(new_user)
-#     db.commit()
-#     db.refresh(new_user)
-#     return Response(content='admin created', status_code=201)
+@app.post("/add_admin", response_model=schemas.Admin)
+def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
+    user_data = user.dict()
+    user_data["password"] = pwd_context.hash(user.password)
+    new_user = models.Admins(**user_data)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return Response(content='admin created', status_code=201)
 
