@@ -16,7 +16,7 @@ security = HTTPBearer()
 
 user_in_code = None
 
-@app.post("/sign up")
+@app.post("/Account/sign_up", tags=['Account'])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     user_data = user.dict()
     user_data["password"] = pwd_context.hash(user.password)
@@ -31,7 +31,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return {"message": "user created", "access_token": token, "token_type": "bearer"}
 
 
-@app.post("/login", response_model=schemas.Token)
+@app.post("/Account/login", tags=['Account'] , response_model=schemas.Token)
 def review_user(user: schemas.LoginRequest, db: Session = Depends(get_db)):
     global user_in_code
     user_review = db.query(models.Users).filter(models.Users.user_id == user.user_id).first()
