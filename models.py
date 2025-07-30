@@ -76,6 +76,21 @@ class Quiz_result(Base):
 
     user2 = relationship('Users', back_populates= 'quiz')
 
+# class QuizQuestions(Base):
+#     __tablename__ = "Quiz_questions"
+#     user_id = Column(Integer, primary_key=True, unique= True)
+#     name= Column(String)
+#     q1 =Column(String)
+#     q2 =Column(String)
+#     q3 =Column(String)
+#     q4 =Column(String)
+#     q5 =Column(String)
+#     q6 =Column(String)
+#     q7 =Column(String)
+#     q8 =Column(String)
+#     q9 =Column(String)
+#     q10 =Column(String)
+
 class Routine_Plans(Base):
     __tablename__ = "Routine_Plans"
     routine_id = Column(Integer, primary_key=True, unique= True)

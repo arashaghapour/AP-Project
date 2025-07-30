@@ -28,6 +28,55 @@ class InteractionTypeAllowed(str, Enum):
     wishlist = 'wishlist'
     cart = 'cart'
 
+class Q1Options(str, Enum):
+    dry = "dry"
+    smooth = "smooth"
+    oily = "oily"
+    combination = "combination"
+
+class Q2Options(str, Enum):
+    yes = "yes"
+    sometimes = "sometimes"
+    rarely = "rarely"
+    t_zone_only = "T-zone only"
+
+class Q3Options(str, Enum):
+    very_sensitive = "very_sensitive"
+    mildly = "mildly"
+    not_sensitive = "not_sensitive"
+    not_sure = "not_sure"
+
+class Q4Options(str, Enum):
+    yes = "yes"
+    no = "no"
+
+class Q5Options(str, Enum):
+    yes = "yes"
+    no = "no"
+
+class Q6Options(str, Enum):
+    yes = "yes"
+    no = "no"
+
+class Q7Options(str, Enum):
+    under_5min = "under_5min"
+    between_5_10 = "5-10min"
+    over_15 = "15min_plus"
+
+class Q8Options(str, Enum):
+    minimal = "minimal"
+    moderate = "moderate"
+    full = "full"
+
+class Q9Options(str, Enum):
+    natural = "natural"
+    clinical = "clinical"
+
+class Q10Options(str, Enum):
+    daily = "daily"
+    weekly = "weekly"
+    rarely = "rarely"
+    never = "never"
 
 class UserCreate(BaseModel):
     user_id: int
@@ -107,3 +156,38 @@ class Token(BaseModel):
     
 class Search(BaseModel):
     search: str
+
+class QuizQuestions(BaseModel):
+    # user_id: int
+    # # name: str
+    # answers: Dict[str, str]
+    # # q1 :str
+    # # q2 :str
+    # # q3 :str
+    # # q4 :str
+    # # q5 :str
+    # # q6 :str
+    # # q7 :str
+    # # q8 :str
+    # # q9 :str
+    # # q10 :str
+    user_id: int
+    q1: Q1Options
+    q2: Q2Options
+    q3: Q3Options
+    q4: Q4Options
+    q5: Q5Options
+    q6: Q6Options
+    q7: Q7Options
+    q8: Q8Options
+    q9: Q9Options
+    q10: Q10Options
+    
+class QuizResult(BaseModel):
+    # quiz_id :int
+    user_id :int
+    skin_type :SkinTypeAllowed
+    concerns :List[str]
+    preferences :List[str]
+    timestamp :datetime
+

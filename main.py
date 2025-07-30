@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-from . import schemas, models
+from . import schemas, models, questions, utils
 from .database import Base, engine, get_db
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer
@@ -172,3 +172,34 @@ def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return Response(content='admin created', status_code=201)
 
+
+@app.get('/quiz/questions', tags=['Quiz'])
+def quiz_questions():
+    return {"questions": questions.questions}
+
+@app.post('/quiz/submit', response_model= schemas.QuizQuestions, tags=['Quiz'])
+def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
+    answers = {
+        "q1": data.q1.value,
+        "q2": data.q2.value,
+        "q3": data.q3.value,
+        "q4": data.q4.value,
+        "q5": data.q5.value,
+        "q6": data.q6.value,
+        "q7": data.q7.value,
+        "q8": data.q8.value,
+        "q9": data.q9.value,
+        "q10": data.q10.value,
+    }
+    result = utils.analyze_quiz(data.answers)
+    quiz = models.Quiz_result(
+        user_id=data.user_id,
+        skin_type=result["skin_type"],
+        concerns=result["concerns"],
+        preferences=result["preferences"]
+    )
+    db.add(quiz)
+    db.commit()
+    db.refresh(quiz)
+
+    return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
