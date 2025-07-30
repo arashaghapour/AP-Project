@@ -177,7 +177,7 @@ def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
 def quiz_questions():
     return {"questions": questions.questions}
 
-@app.post('/quiz/submit', response_model= schemas.QuizQuestions, tags=['Quiz'])
+@app.post('/quiz/submit',  tags=['Quiz'])
 def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
     answers = {
         "q1": data.q1.value,
@@ -191,7 +191,7 @@ def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
         "q9": data.q9.value,
         "q10": data.q10.value,
     }
-    result = utils.analyze_quiz(data.answers)
+    result = utils.analyze_quiz(answers)
     quiz = models.Quiz_result(
         user_id=data.user_id,
         skin_type=result["skin_type"],
