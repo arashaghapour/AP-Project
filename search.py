@@ -1,3 +1,4 @@
+import sqlite3 as lite
 def search_in_database(user_in_code, products, searched_item, purchase, browsed, users):
     products_scores = {}    
     parameters_score = {'concerns': 85, 'category': 75, 'views':63,'searched_box': 120,
@@ -22,7 +23,8 @@ def search_in_database(user_in_code, products, searched_item, purchase, browsed,
         parameters_score['views']: 'it because ite view.',
         parameters_score['skin_type']: 'it because you have same skin types.'
     }
-
+    conn = lite.connect('database.db')
+    cursor = conn.cursor()
     results = []
     views = {}
     exist = False
