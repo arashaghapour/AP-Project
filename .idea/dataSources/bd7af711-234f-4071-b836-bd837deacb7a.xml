@@ -2,7 +2,7 @@
 <dataSource name="database">
   <database-model serializer="dbm" dbms="SQLITE" family-id="SQLITE" format-version="4.53">
     <root id="1">
-      <ServerVersion>3.45.1</ServerVersion>
+      <ServerVersion>3.50.3</ServerVersion>
     </root>
     <collation id="2" parent="1" name="BINARY"/>
     <collation id="3" parent="1" name="NOCASE"/>
@@ -499,7 +499,7 @@
     </routine>
     <schema id="191" parent="1" name="main">
       <Current>1</Current>
-      <LastIntrospectionLocalTimestamp>2025-07-18.15:51:27</LastIntrospectionLocalTimestamp>
+      <LastIntrospectionLocalTimestamp>2025-08-12.12:16:22</LastIntrospectionLocalTimestamp>
     </schema>
     <argument id="192" parent="16">
       <ArgumentDirection>R</ArgumentDirection>
@@ -1595,201 +1595,490 @@
     <table id="557" parent="191" name="Contextual_Signals"/>
     <table id="558" parent="191" name="Products"/>
     <table id="559" parent="191" name="Purchase_History"/>
-    <table id="560" parent="191" name="Users"/>
-    <table id="561" parent="191" name="sqlite_master">
+    <table id="560" parent="191" name="Quiz_questions"/>
+    <table id="561" parent="191" name="Quiz_result"/>
+    <table id="562" parent="191" name="Routine_Plans"/>
+    <table id="563" parent="191" name="Users"/>
+    <table id="564" parent="191" name="sqlite_master">
       <System>1</System>
     </table>
-    <column id="562" parent="555" name="user_id">
+    <column id="565" parent="555" name="user_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="563" parent="555" name="password">
+    <column id="566" parent="555" name="password">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <index id="564" parent="555" name="sqlite_autoindex_Admins_1">
+    <index id="567" parent="555" name="sqlite_autoindex_Admins_1">
       <ColNames>user_id
 password</ColNames>
       <NameSurrogate>1</NameSurrogate>
       <Unique>1</Unique>
     </index>
-    <key id="565" parent="555">
+    <index id="568" parent="555" name="ix_Admins_user_id">
+      <ColNames>user_id</ColNames>
+    </index>
+    <index id="569" parent="555" name="ix_Admins_password">
+      <ColNames>password</ColNames>
+    </index>
+    <key id="570" parent="555">
       <ColNames>user_id
 password</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>sqlite_autoindex_Admins_1</UnderlyingIndexName>
     </key>
-    <column id="566" parent="556" name="user_id">
+    <column id="571" parent="556" name="id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="567" parent="556" name="product_id">
+    <column id="572" parent="556" name="user_id">
       <Position>2</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="568" parent="556" name="timestamp">
+    <column id="573" parent="556" name="product_id">
       <Position>3</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="574" parent="556" name="timestamp">
+      <Position>4</Position>
       <StoredType>DATETIME|0s</StoredType>
     </column>
-    <column id="569" parent="556" name="interaction_type">
+    <column id="575" parent="556" name="interaction_type">
       <NotNull>1</NotNull>
-      <Position>4</Position>
+      <Position>5</Position>
       <StoredType>VARCHAR(8)|0s</StoredType>
     </column>
-    <key id="570" parent="556">
+    <foreign-key id="576" parent="556">
       <ColNames>user_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>Users</RefTableName>
+    </foreign-key>
+    <index id="577" parent="556" name="ix_Browsing_History_id">
+      <ColNames>id</ColNames>
+    </index>
+    <index id="578" parent="556" name="ix_Browsing_History_user_id">
+      <ColNames>user_id</ColNames>
+    </index>
+    <index id="579" parent="556" name="ix_Browsing_History_product_id">
+      <ColNames>product_id</ColNames>
+    </index>
+    <index id="580" parent="556" name="ix_Browsing_History_timestamp">
+      <ColNames>timestamp</ColNames>
+    </index>
+    <index id="581" parent="556" name="ix_Browsing_History_interaction_type">
+      <ColNames>interaction_type</ColNames>
+    </index>
+    <key id="582" parent="556">
+      <ColNames>id</ColNames>
       <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Browsing_History_id</UnderlyingIndexName>
     </key>
-    <column id="571" parent="557" name="user_id">
+    <column id="583" parent="557" name="user_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="572" parent="557" name="timestamp">
+    <column id="584" parent="557" name="timestamp">
       <Position>2</Position>
       <StoredType>DATETIME|0s</StoredType>
     </column>
-    <column id="573" parent="557" name="device_type">
+    <column id="585" parent="557" name="device_type">
       <Position>3</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <column id="574" parent="557" name="season">
+    <column id="586" parent="557" name="season">
       <Position>4</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <key id="575" parent="557">
+    <index id="587" parent="557" name="ix_Contextual_Signals_user_id">
+      <ColNames>user_id</ColNames>
+    </index>
+    <index id="588" parent="557" name="ix_Contextual_Signals_timestamp">
+      <ColNames>timestamp</ColNames>
+    </index>
+    <index id="589" parent="557" name="ix_Contextual_Signals_device_type">
+      <ColNames>device_type</ColNames>
+    </index>
+    <index id="590" parent="557" name="ix_Contextual_Signals_season">
+      <ColNames>season</ColNames>
+    </index>
+    <key id="591" parent="557">
       <ColNames>user_id</ColNames>
       <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Contextual_Signals_user_id</UnderlyingIndexName>
     </key>
-    <column id="576" parent="558" name="product_id">
+    <column id="592" parent="558" name="product_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="577" parent="558" name="name">
+    <column id="593" parent="558" name="name">
       <Position>2</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <column id="578" parent="558" name="brand">
+    <column id="594" parent="558" name="brand">
       <Position>3</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <column id="579" parent="558" name="category">
+    <column id="595" parent="558" name="category">
       <Position>4</Position>
       <StoredType>JSON|0s</StoredType>
     </column>
-    <column id="580" parent="558" name="skin_types">
+    <column id="596" parent="558" name="skin_types">
       <Position>5</Position>
       <StoredType>JSON|0s</StoredType>
     </column>
-    <column id="581" parent="558" name="concerns_targeted">
+    <column id="597" parent="558" name="concerns_targeted">
       <Position>6</Position>
       <StoredType>JSON|0s</StoredType>
     </column>
-    <column id="582" parent="558" name="ingredients">
+    <column id="598" parent="558" name="ingredients">
       <Position>7</Position>
       <StoredType>JSON|0s</StoredType>
     </column>
-    <column id="583" parent="558" name="price">
+    <column id="599" parent="558" name="price">
       <Position>8</Position>
-      <StoredType>INTEGER|0s</StoredType>
+      <StoredType>NUMERIC|0s</StoredType>
     </column>
-    <column id="584" parent="558" name="rating">
+    <column id="600" parent="558" name="rating">
       <Position>9</Position>
       <StoredType>FLOAT|0s</StoredType>
     </column>
-    <key id="585" parent="558">
+    <column id="601" parent="558" name="image_url">
+      <Position>10</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="602" parent="558" name="tags">
+      <Position>11</Position>
+      <StoredType>JSON|0s</StoredType>
+    </column>
+    <index id="603" parent="558" name="ix_Products_product_id">
+      <ColNames>product_id</ColNames>
+    </index>
+    <index id="604" parent="558" name="ix_Products_name">
+      <ColNames>name</ColNames>
+    </index>
+    <index id="605" parent="558" name="ix_Products_brand">
+      <ColNames>brand</ColNames>
+    </index>
+    <index id="606" parent="558" name="ix_Products_price">
+      <ColNames>price</ColNames>
+    </index>
+    <index id="607" parent="558" name="ix_Products_rating">
+      <ColNames>rating</ColNames>
+    </index>
+    <index id="608" parent="558" name="ix_Products_image_url">
+      <ColNames>image_url</ColNames>
+    </index>
+    <index id="609" parent="558" name="ix_Products_tags">
+      <ColNames>tags</ColNames>
+    </index>
+    <key id="610" parent="558">
       <ColNames>product_id</ColNames>
       <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Products_product_id</UnderlyingIndexName>
     </key>
-    <column id="586" parent="559" name="id">
+    <column id="611" parent="559" name="id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="587" parent="559" name="user_id">
+    <column id="612" parent="559" name="user_id">
       <Position>2</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="588" parent="559" name="product_id">
+    <column id="613" parent="559" name="product_id">
       <Position>3</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="589" parent="559" name="quantity">
+    <column id="614" parent="559" name="quantity">
       <Position>4</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="590" parent="559" name="timestamp">
+    <column id="615" parent="559" name="timestamp">
       <Position>5</Position>
       <StoredType>DATETIME|0s</StoredType>
     </column>
-    <key id="591" parent="559">
+    <foreign-key id="616" parent="559">
+      <ColNames>user_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>Users</RefTableName>
+    </foreign-key>
+    <foreign-key id="617" parent="559">
+      <ColNames>product_id</ColNames>
+      <RefColNames>product_id</RefColNames>
+      <RefTableName>Browsing_History</RefTableName>
+    </foreign-key>
+    <index id="618" parent="559" name="ix_Purchase_History_id">
+      <ColNames>id</ColNames>
+    </index>
+    <index id="619" parent="559" name="ix_Purchase_History_user_id">
+      <ColNames>user_id</ColNames>
+    </index>
+    <index id="620" parent="559" name="ix_Purchase_History_product_id">
+      <ColNames>product_id</ColNames>
+    </index>
+    <index id="621" parent="559" name="ix_Purchase_History_quantity">
+      <ColNames>quantity</ColNames>
+    </index>
+    <index id="622" parent="559" name="ix_Purchase_History_timestamp">
+      <ColNames>timestamp</ColNames>
+    </index>
+    <key id="623" parent="559">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Purchase_History_id</UnderlyingIndexName>
     </key>
-    <column id="592" parent="560" name="user_id">
+    <column id="624" parent="560" name="user_id">
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>INTEGER|0s</StoredType>
     </column>
-    <column id="593" parent="560" name="password">
-      <NotNull>1</NotNull>
+    <column id="625" parent="560" name="name">
       <Position>2</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <column id="594" parent="560" name="skin_type">
+    <column id="626" parent="560" name="q1">
+      <Position>3</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="627" parent="560" name="q2">
+      <Position>4</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="628" parent="560" name="q3">
+      <Position>5</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="629" parent="560" name="q4">
+      <Position>6</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="630" parent="560" name="q5">
+      <Position>7</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="631" parent="560" name="q6">
+      <Position>8</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="632" parent="560" name="q7">
+      <Position>9</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="633" parent="560" name="q8">
+      <Position>10</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="634" parent="560" name="q9">
+      <Position>11</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="635" parent="560" name="q10">
+      <Position>12</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <index id="636" parent="560" name="ix_Quiz_questions_user_id">
+      <ColNames>user_id</ColNames>
+      <Unique>1</Unique>
+    </index>
+    <index id="637" parent="560" name="ix_Quiz_questions_name">
+      <ColNames>name</ColNames>
+    </index>
+    <index id="638" parent="560" name="ix_Quiz_questions_q1">
+      <ColNames>q1</ColNames>
+    </index>
+    <index id="639" parent="560" name="ix_Quiz_questions_q2">
+      <ColNames>q2</ColNames>
+    </index>
+    <index id="640" parent="560" name="ix_Quiz_questions_q3">
+      <ColNames>q3</ColNames>
+    </index>
+    <index id="641" parent="560" name="ix_Quiz_questions_q4">
+      <ColNames>q4</ColNames>
+    </index>
+    <index id="642" parent="560" name="ix_Quiz_questions_q5">
+      <ColNames>q5</ColNames>
+    </index>
+    <index id="643" parent="560" name="ix_Quiz_questions_q6">
+      <ColNames>q6</ColNames>
+    </index>
+    <index id="644" parent="560" name="ix_Quiz_questions_q7">
+      <ColNames>q7</ColNames>
+    </index>
+    <index id="645" parent="560" name="ix_Quiz_questions_q8">
+      <ColNames>q8</ColNames>
+    </index>
+    <index id="646" parent="560" name="ix_Quiz_questions_q9">
+      <ColNames>q9</ColNames>
+    </index>
+    <index id="647" parent="560" name="ix_Quiz_questions_q10">
+      <ColNames>q10</ColNames>
+    </index>
+    <key id="648" parent="560">
+      <ColNames>user_id</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Quiz_questions_user_id</UnderlyingIndexName>
+    </key>
+    <column id="649" parent="561" name="quiz_id">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="650" parent="561" name="user_id">
+      <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="651" parent="561" name="skin_type">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>VARCHAR(11)|0s</StoredType>
     </column>
-    <column id="595" parent="560" name="concers">
+    <column id="652" parent="561" name="concerns">
       <Position>4</Position>
       <StoredType>JSON|0s</StoredType>
     </column>
-    <column id="596" parent="560" name="preferences">
+    <column id="653" parent="561" name="preferences">
       <Position>5</Position>
       <StoredType>JSON|0s</StoredType>
     </column>
-    <column id="597" parent="560" name="devise">
+    <column id="654" parent="561" name="timestamp">
+      <Position>6</Position>
+      <StoredType>DATETIME|0s</StoredType>
+    </column>
+    <foreign-key id="655" parent="561">
+      <ColNames>user_id</ColNames>
+      <RefColNames>user_id</RefColNames>
+      <RefTableName>Users</RefTableName>
+    </foreign-key>
+    <index id="656" parent="561" name="ix_Quiz_result_quiz_id">
+      <ColNames>quiz_id</ColNames>
+      <Unique>1</Unique>
+    </index>
+    <index id="657" parent="561" name="ix_Quiz_result_user_id">
+      <ColNames>user_id</ColNames>
+    </index>
+    <index id="658" parent="561" name="ix_Quiz_result_timestamp">
+      <ColNames>timestamp</ColNames>
+    </index>
+    <key id="659" parent="561">
+      <ColNames>quiz_id</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Quiz_result_quiz_id</UnderlyingIndexName>
+    </key>
+    <column id="660" parent="562" name="routine_id">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="661" parent="562" name="user_id">
+      <Position>2</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="662" parent="562" name="plan_name">
+      <Position>3</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="663" parent="562" name="steps">
+      <Position>4</Position>
+      <StoredType>JSON|0s</StoredType>
+    </column>
+    <column id="664" parent="562" name="created_at">
+      <Position>5</Position>
+      <StoredType>DATETIME|0s</StoredType>
+    </column>
+    <index id="665" parent="562" name="ix_Routine_Plans_routine_id">
+      <ColNames>routine_id</ColNames>
+      <Unique>1</Unique>
+    </index>
+    <index id="666" parent="562" name="ix_Routine_Plans_user_id">
+      <ColNames>user_id</ColNames>
+    </index>
+    <index id="667" parent="562" name="ix_Routine_Plans_plan_name">
+      <ColNames>plan_name</ColNames>
+    </index>
+    <index id="668" parent="562" name="ix_Routine_Plans_steps">
+      <ColNames>steps</ColNames>
+    </index>
+    <index id="669" parent="562" name="ix_Routine_Plans_created_at">
+      <ColNames>created_at</ColNames>
+    </index>
+    <key id="670" parent="562">
+      <ColNames>routine_id</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>ix_Routine_Plans_routine_id</UnderlyingIndexName>
+    </key>
+    <column id="671" parent="563" name="user_id">
+      <NotNull>1</NotNull>
+      <Position>1</Position>
+      <StoredType>INTEGER|0s</StoredType>
+    </column>
+    <column id="672" parent="563" name="password">
+      <Position>2</Position>
+      <StoredType>VARCHAR|0s</StoredType>
+    </column>
+    <column id="673" parent="563" name="skin_type">
+      <NotNull>1</NotNull>
+      <Position>3</Position>
+      <StoredType>VARCHAR(11)|0s</StoredType>
+    </column>
+    <column id="674" parent="563" name="concers">
+      <Position>4</Position>
+      <StoredType>JSON|0s</StoredType>
+    </column>
+    <column id="675" parent="563" name="preferences">
+      <Position>5</Position>
+      <StoredType>JSON|0s</StoredType>
+    </column>
+    <column id="676" parent="563" name="device_type">
       <Position>6</Position>
       <StoredType>VARCHAR|0s</StoredType>
     </column>
-    <column id="598" parent="560" name="created_at">
+    <column id="677" parent="563" name="created_at">
       <Position>7</Position>
       <StoredType>DATETIME|0s</StoredType>
     </column>
-    <index id="599" parent="560" name="sqlite_autoindex_Users_1">
-      <ColNames>user_id
-password</ColNames>
-      <NameSurrogate>1</NameSurrogate>
-      <Unique>1</Unique>
+    <index id="678" parent="563" name="ix_Users_user_id">
+      <ColNames>user_id</ColNames>
     </index>
-    <key id="600" parent="560">
-      <ColNames>user_id
-password</ColNames>
+    <index id="679" parent="563" name="ix_Users_password">
+      <ColNames>password</ColNames>
+    </index>
+    <index id="680" parent="563" name="ix_Users_skin_type">
+      <ColNames>skin_type</ColNames>
+    </index>
+    <index id="681" parent="563" name="ix_Users_device_type">
+      <ColNames>device_type</ColNames>
+    </index>
+    <index id="682" parent="563" name="ix_Users_created_at">
+      <ColNames>created_at</ColNames>
+    </index>
+    <key id="683" parent="563">
+      <ColNames>user_id</ColNames>
       <Primary>1</Primary>
-      <UnderlyingIndexName>sqlite_autoindex_Users_1</UnderlyingIndexName>
+      <UnderlyingIndexName>ix_Users_user_id</UnderlyingIndexName>
     </key>
-    <column id="601" parent="561" name="type">
+    <column id="684" parent="564" name="type">
       <Position>1</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="602" parent="561" name="name">
+    <column id="685" parent="564" name="name">
       <Position>2</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="603" parent="561" name="tbl_name">
+    <column id="686" parent="564" name="tbl_name">
       <Position>3</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>
-    <column id="604" parent="561" name="rootpage">
+    <column id="687" parent="564" name="rootpage">
       <Position>4</Position>
       <StoredType>INT|0s</StoredType>
     </column>
-    <column id="605" parent="561" name="sql">
+    <column id="688" parent="564" name="sql">
       <Position>5</Position>
       <StoredType>TEXT|0s</StoredType>
     </column>

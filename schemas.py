@@ -81,10 +81,10 @@ class Q10Options(str, Enum):
 class UserCreate(BaseModel):
     user_id: int
     password: str
-    skin_type: SkinTypeAllowed
-    concers: dict
-    preferences: dict
-    devise: str
+    skin_type: str
+    concers: List[str]
+    preferences: List[str]
+    device_type: str
     created_at: datetime
 
 
@@ -92,8 +92,8 @@ class ProductCreate(BaseModel):
     product_id: int
     name: str
     brand: str
-    category: List[CategoryAllowed]
-    skin_types: List[SkinTypeAllowed]
+    category: List[str]
+    skin_types: List[str]
     concerns_targeted: List[str]
     ingredients: List[str]
     price: int

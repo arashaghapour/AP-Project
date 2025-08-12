@@ -7,7 +7,6 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List
 from .search import search_in_database
-
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -115,7 +114,7 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
             "user_id": items.user_id,
             "product_id": items.product_id,
             "quantity": items.quantity,
-            'timestamp': items.timestamp            
+            'timestamp': items.timestamp
         }
         purchase_list.append(purchase_dict)
     searches = db.query(models.Browsing_History).all()
@@ -123,7 +122,7 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
         search_dict = {
             "user_id": items.user_id,
             "product_id": items.product_id,
-            'timestamp': items.timestamp            
+            'timestamp': items.timestamp
         }
         browsed.append(search_dict)
     users_dict = {}
