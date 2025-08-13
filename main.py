@@ -1,13 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-from . import schemas, models, questions, utils
+from . import schemas, models
 from .database import Base, engine, get_db
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List
 from .search import search_in_database
-
+from routine import create_product, create_routine
+from schemas import ProductCreate, ProductOut, QuizInput, RoutinePlanOut
+from utils import csv_to_list
+from models import Product
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -203,3 +206,15 @@ def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
     db.refresh(quiz)
 
     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
+
+@app.post("/products", response_model=ProductOut)
+def add_product(data: ProductCreate, db: Session = Depends(get_db)):
+    return create_product(db, data)
+
+@app.post("/generate_routine", response_model=list[RoutinePlanOut])
+def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
+    plans = []
+    for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
+        routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
+        plans.append(routine)
+    return plans

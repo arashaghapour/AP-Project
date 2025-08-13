@@ -32,3 +32,11 @@ def analyze_quiz(answers: dict) -> dict:
         "concerns": concerns,
         "preferences": preferences
     }
+
+def csv_to_list(s: str):
+    if not s:
+        return []
+    return [x.strip().lower() for x in s.split(",") if x.strip()]
+
+def list_to_csv(lst: list):
+    return ",".join(sorted(set([x.strip().lower() for x in lst if x.strip()])))

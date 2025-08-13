@@ -132,3 +132,30 @@ class Contextual_Signals(Base):
     device_type = Column(String)
     season = Column(String)
 
+class Product(Base):
+    __tablename__ = "products"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    brand = Column(String, nullable=True)
+    category = Column(String, nullable=False)  
+    price = Column(Float, nullable=False)
+    skin_types_csv = Column(String, default="all")    
+    concerns_targeted_csv = Column(String, default="") 
+    preferences_csv = Column(String, default="")       
+
+class RoutinePlan(Base):
+    __tablename__ = "routine_plans"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=True)
+    plan_name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    steps = relationship("RoutineStep", back_populates="routine", cascade="all, delete-orphan")
+
+class RoutineStep(Base):
+    __tablename__ = "routine_steps"
+    id = Column(Integer, primary_key=True, index=True)
+    routine_id = Column(Integer, ForeignKey("routine_plans.id"))
+    step_name = Column(String, nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=True)
+    product_name = Column(String, nullable=True)
+    routine = relationship("RoutinePlan", back_populates="steps")

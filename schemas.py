@@ -191,3 +191,46 @@ class QuizResult(BaseModel):
     preferences :List[str]
     timestamp :datetime
 
+class ProductCreate(BaseModel):
+    name: str
+    brand: Optional[str] = None
+    category: str
+    price: float
+    skin_types: List[str] = Field(default_factory=list)
+    concerns_targeted: List[str] = Field(default_factory=list)
+    preferences: List[str] = Field(default_factory=list)
+
+class ProductOut(BaseModel):
+    id: int
+    name: str
+    brand: Optional[str]
+    category: str
+    price: float
+    skin_types: List[str]
+    concerns_targeted: List[str]
+    preferences: List[str]
+
+    class Config:
+        from_attributes = True
+
+class QuizInput(BaseModel):
+    user_id: Optional[int] = None
+    skin_type: str
+    concerns: List[str] = Field(default_factory=list)
+    preferences: List[str] = Field(default_factory=list)
+    budget_range: List[float] = Field(default_factory=lambda: [0, 999])
+
+class RoutineStepOut(BaseModel):
+    step_name: str
+    product_id: Optional[int]
+    product_name: Optional[str]
+
+class RoutinePlanOut(BaseModel):
+    id: int
+    user_id: Optional[int]
+    plan_name: str
+    created_at: datetime
+    steps: List[RoutineStepOut]
+
+    class Config:
+        from_attributes = True
