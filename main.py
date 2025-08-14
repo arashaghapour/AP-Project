@@ -1,16 +1,16 @@
 from fastapi import FastAPI, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
-from . import schemas, models
+from . import schemas, models, utils, questions
 from .database import Base, engine, get_db
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List
 from .search import search_in_database
-from routine import create_product, create_routine
-from schemas import ProductCreate, ProductOut, QuizInput, RoutinePlanOut
-from utils import csv_to_list
-from models import Product
+from .routine import create_product, create_routine
+from .schemas import ProductCreate, ProductOut, QuizInput, RoutinePlanOut
+from .utils import csv_to_list
+from .models import Product
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
