@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
-from models import Product, RoutinePlan, RoutineStep
-from utils import csv_to_list, list_to_csv
-from schemas import ProductCreate
+from .models import Product, RoutinePlan, RoutineStep
+from .utils import csv_to_list, list_to_csv
+from .schemas import ProductCreate
 from typing import List, Optional, Tuple
 
 ROUTINE_TEMPLATES = {

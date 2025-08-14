@@ -46,7 +46,7 @@ questions = [
     },
     {
         "id": "q10",
-        "text": "Do you wear makeup regularly?",
+        "text": "Do you wear makeup regularely?",
         "options": ["daily", "weekly", "rarely", "never"]
     }
 ]
