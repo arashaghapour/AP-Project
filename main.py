@@ -1,19 +1,48 @@
-from fastapi import FastAPI, Depends, HTTPException, Response
+from fastapi import FastAPI, Depends, HTTPException, Response, File, UploadFile, Form
 from sqlalchemy.orm import Session
-from . import schemas, models
+from . import schemas, models, utils, questions
 from .database import Base, engine, get_db
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
-from typing import List
+from typing import List, Optional
 from .search import search_in_database
-Base.metadata.create_all(bind=engine)
+from .routine import create_product, create_routine
+from .schemas import ProductCreate, ProductOut, QuizInput, RoutinePlanOut
+from .utils import csv_to_list
+from .models import Product
+import requests
 
+
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
-
+AILAB_API_KEY = "cmea2907w0001jo041hntvzpp"
+AILAB_URL = "https://api.ailabtools.com/skin/analyze"
 user_in_code = None
+
+
+def merge_results(selfie_result: dict, quiz_result: dict) -> dict:
+    skin_type_selfie = selfie_result.get("skin_type")
+    skin_type_quiz = quiz_result.get("skin_type")
+    skin_type_final = skin_type_selfie if skin_type_selfie else skin_type_quiz
+
+    concerns_selfie = []
+    for key in ["acne", "wrinkles", "dark_circles", "spots"]:
+        if selfie_result.get(key, 0) > 0.1:
+            concerns_selfie.append(key)
+    concerns_quiz = quiz_result.get("concerns", [])
+    final_concerns = list(set(concerns_selfie + concerns_quiz))
+
+    preferences = quiz_result.get("preferences", {})
+
+    return {
+        "skin_type": skin_type_final,
+        "concerns": final_concerns,
+        "preferences": preferences
+    }
+
 
 @app.post("/Account/sign_up", tags=['Account'])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -129,29 +158,108 @@ def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
 def quiz_questions():
     return {"questions": questions.questions}
 
-@app.post('/quiz/submit',  tags=['Quiz'])
-def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
-    answers = {
-        "q1": data.q1.value,
-        "q2": data.q2.value,
-        "q3": data.q3.value,
-        "q4": data.q4.value,
-        "q5": data.q5.value,
-        "q6": data.q6.value,
-        "q7": data.q7.value,
-        "q8": data.q8.value,
-        "q9": data.q9.value,
-        "q10": data.q10.value,
-    }
-    result = utils.analyze_quiz(answers)
-    quiz = models.Quiz_result(
-        user_id=data.user_id,
-        skin_type=result["skin_type"],
-        concerns=result["concerns"],
-        preferences=result["preferences"]
-    )
-    db.add(quiz)
-    db.commit()
-    db.refresh(quiz)
+# @app.post('/quiz/submit',  tags=['Quiz'])
+# def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
+#     answers = {
+#         "q1": data.q1.value,
+#         "q2": data.q2.value,
+#         "q3": data.q3.value,
+#         "q4": data.q4.value,
+#         "q5": data.q5.value,
+#         "q6": data.q6.value,
+#         "q7": data.q7.value,
+#         "q8": data.q8.value,
+#         "q9": data.q9.value,
+#         "q10": data.q10.value,
+#     }
+#     result = utils.analyze_quiz(answers)
+#     quiz = models.Quiz_result(
+#         user_id=data.user_id,
+#         skin_type=result["skin_type"],
+#         concerns=result["concerns"],
+#         preferences=result["preferences"]
+#     )
+#     db.add(quiz)
+#     db.commit()
+#     db.refresh(quiz)
 
-    return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
+#     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
+@app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
+def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
+    plans = []
+    for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
+        routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
+        plans.append(routine)
+    return plans
+
+# @app.post('/quiz/selfie', tags=['Quiz'])
+# async def selfie_analyze(file: UploadFile= File(...), db: Session = Depends(get_db)):
+#     files = {"image":(file.filename, await file.read(), file.content_type)}
+
+#     headers = {'X-API-KEY':  AILAB_API_KEY}
+
+#     response = requests.post(AILAB_URL, files = files, headers= headers)
+
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         return {'error': response.text}
+
+@app.post('/quiz/submit', tags=['Quiz'])
+async def submitting_quiz(user_id: int = Form(...),
+                          q1: str = Form(...),
+                          q2: str = Form(...),
+                          q3: str = Form(...),
+                          q4: str = Form(...),
+                          q5: str = Form(...),
+                          q6: str = Form(...),
+                          q7: str = Form(...),
+                          q8: str = Form(...),
+                          q9: str = Form(...),
+                          q10: str = Form(...), db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+    selfie_result = {}
+    if file is not None:
+        if not file.content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="Please enter appropriate file(image)")
+
+        files = {"image": (file.filename, await file.read(), file.content_type)}
+        headers = {"X-API-KEY": AILAB_API_KEY}
+        response = requests.post(AILAB_URL, files=files, headers=headers)
+
+        if response.status_code != 200:
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+
+        selfie_result = response.json()
+
+    answers = {
+        "q1": q1,
+        "q2": q2,
+        "q3": q3,
+        "q4": q4,
+        "q5": q5,
+        "q6": q6,
+        "q7": q7,
+        "q8": q8,
+        "q9": q9,
+        "q10": q10,
+    }
+    quiz_result = utils.analyze_quiz(answers)
+
+    if selfie_result:
+        final_result_data = merge_results(selfie_result, quiz_result)
+    else:
+        final_result_data = quiz_result
+
+    final = models.FinalResult(user_id=user_id,
+                               selfie_result=selfie_result,
+                               quiz_result=quiz_result,
+                               final_result=final_result_data)
+
+    db.add(final)
+    db.commit()
+    db.refresh(final)
+    return {
+        "final_result_id": final.id,
+        "final_result": final_result_data,
+        "message": "Conclusion has been successfully saved!"
+    }

@@ -129,3 +129,20 @@ class Contextual_Signals(Base):
     timestamp = Column(DateTime, index=True)
     device_type = Column(String, index=True)
     season = Column(String, index=True)
+
+class RoutinePlan(Base):
+    __tablename__ = "routine_plans"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=True)
+    plan_name = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    steps = relationship("RoutineStep", back_populates="routine", cascade="all, delete-orphan")
+
+class FinalResult(Base):
+    __tablename__ = 'final_result'
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)
+    selfie_result = Column(JSON, nullable=True)
+    quiz_result = Column(JSON, nullable=False)
+    final_result = Column(JSON, nullable=False)

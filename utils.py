@@ -2,7 +2,7 @@ def analyze_quiz(answers: dict) -> dict:
     skin_type = ''
     concerns = []
     preferences = []
-    
+
     if answers.get('q1') == 'dry':
         skin_type = 'dry'
     elif answers.get('q1') == 'oily':
@@ -10,7 +10,6 @@ def analyze_quiz(answers: dict) -> dict:
     elif answers.get('q1') == 'combination':
         skin_type = 'combination'
 
-    
     if answers.get("q3") == "very_sensitive":
         skin_type = "sensitive"
 
@@ -20,7 +19,7 @@ def analyze_quiz(answers: dict) -> dict:
         concerns.append("wrinkles")
     if answers.get("q6") == "yes":
         concerns.append("dark_spots")
-    
+
     preferences = {
         "time": answers.get("q7"),
         "steps": answers.get("q8"),
@@ -32,3 +31,13 @@ def analyze_quiz(answers: dict) -> dict:
         "concerns": concerns,
         "preferences": preferences
     }
+
+
+def csv_to_list(s: str):
+    if not s:
+        return []
+    return [x.strip().lower() for x in s.split(",") if x.strip()]
+
+
+def list_to_csv(lst: list):
+    return ",".join(sorted(set([x.strip().lower() for x in lst if x.strip()])))
