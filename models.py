@@ -1,134 +1,131 @@
-from sqlalchemy import Column, Integer,DateTime, JSON, String, Enum as SqllEnum, Float, func, Numeric, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, JSON, String, Enum as SqllEnum, Float, Numeric, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from .database import Base
 from datetime import datetime
 from enum import Enum
 from sqlalchemy.orm import relationship
 
+
 class skin_type_allowed(str, Enum):
     oily = 'oily'
     dry = 'dry'
     sensitive = 'sensitive'
     combination = 'combination'
-    
+
 
 class category_allowed(str, Enum):
     cleanser = 'cleanser'
     serum = 'serum'
     moisturizer = 'moisturizer'
-    
+
 
 class interaction_type_allowed(str, Enum):
     view = 'view'
     like = 'like'
-    wishlist =  'wishlist'
+    wishlist = 'wishlist'
     cart = 'cart'
-    
+
 
 class Users(Base):
     __tablename__ = "Users"
-    user_id = Column(Integer, primary_key=True)
-    name = Column(String)
-    email = Column(String)
-    password = Column(String)
-    skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
+    user_id = Column(Integer, primary_key=True, index=True)
+    password = Column(String, index=True)
+    skin_type = Column(SqllEnum(skin_type_allowed), nullable=False, index=True)
     concers = Column(JSON)
     preferences = Column(JSON)
-    device_type = Column(String)
-    created_at = Column(DateTime)
+    device_type = Column(String, index=True)
+    created_at = Column(DateTime, index=True)
 
     browsing = relationship('Browsing_History', back_populates='user')
-    quiz = relationship('Quiz_result', back_populates= 'user2')
-    # purchasing = relationship('Purchase_History', 'user2')
+    quiz = relationship('Quiz_result', back_populates='user2')
+    purchasing = relationship('Purchase_History', back_populates='user2')  # فعال شد و back_populates اضافه شد
 
 
 class Admins(Base):
-    __tablename__  = "Admins"
-    user_id = Column(Integer, primary_key=True)
-    password = Column(String, primary_key=True)
-    
+    __tablename__ = "Admins"
+    user_id = Column(Integer, primary_key=True, index=True)
+    password = Column(String, primary_key=True, index=True)
+
 
 class Products(Base):
     __tablename__ = "Products"
-    product_id = Column(Integer, primary_key=True)
-    name = Column(String)
-    brand = Column(String)
+    product_id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    brand = Column(String, index=True)
     category = Column(JSON)
     skin_types = Column(JSON)
     concerns_targeted = Column(JSON)
     ingredients = Column(JSON)
-    price = Column(Numeric)
-    rating = Column(Float)
-    image_url = Column(String, nullable= True)
-    tags = Column(JSON)
-
+    price = Column(Numeric, index=True)
+    rating = Column(Float, index=True)
+    image_url = Column(String, nullable=True, index=True)
+    tags = Column(JSON, index=True)
 
 
 class Quiz_result(Base):
     __tablename__ = "Quiz_result"
-    quiz_id = Column(Integer, primary_key= True, unique= True)
-    user_id = Column(Integer, ForeignKey('Users.user_id'))
+    quiz_id = Column(Integer, primary_key=True, unique=True, index=True)
+    user_id = Column(Integer, ForeignKey('Users.user_id'), index=True)
     skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
     concerns = Column(JSON)
     preferences = Column(JSON)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+
+    user2 = relationship('Users', back_populates='quiz')
 
 
-    user2 = relationship('Users', back_populates= 'quiz')
+class QuizQuestions(Base):
+    __tablename__ = "Quiz_questions"
+    user_id = Column(Integer, primary_key=True, unique=True, index=True)
+    name = Column(String, index=True)
+    q1 = Column(String, index=True)
+    q2 = Column(String, index=True)
+    q3 = Column(String, index=True)
+    q4 = Column(String, index=True)
+    q5 = Column(String, index=True)
+    q6 = Column(String, index=True)
+    q7 = Column(String, index=True)
+    q8 = Column(String, index=True)
+    q9 = Column(String, index=True)
+    q10 = Column(String, index=True)
 
-# class QuizQuestions(Base):
-#     __tablename__ = "Quiz_questions"
-#     user_id = Column(Integer, primary_key=True, unique= True)
-#     name= Column(String)
-#     q1 =Column(String)
-#     q2 =Column(String)
-#     q3 =Column(String)
-#     q4 =Column(String)
-#     q5 =Column(String)
-#     q6 =Column(String)
-#     q7 =Column(String)
-#     q8 =Column(String)
-#     q9 =Column(String)
-#     q10 =Column(String)
 
 class Routine_Plans(Base):
     __tablename__ = "Routine_Plans"
-    routine_id = Column(Integer, primary_key=True, unique= True)
-    user_id = Column(Integer)
-    plan_name = Column(String)
-    steps = Column(JSON)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    routine_id = Column(Integer, primary_key=True, unique=True, index=True)
+    user_id = Column(Integer, index=True)
+    plan_name = Column(String, index=True)
+    steps = Column(JSON, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
 class Browsing_History(Base):
     __tablename__ = "Browsing_History"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('Users.user_id'))
-    product_id = Column(Integer)
-    timestamp = Column(DateTime, default=datetime.utcnow)
-    interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    user_id = Column(Integer, ForeignKey('Users.user_id'), index=True)
+    product_id = Column(Integer, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False, index=True)
 
-    user = relationship('Users', back_populates= 'browsing')
-    # purchasing2 = relationship('Purchase_History', 'browsing2')
+    user = relationship('Users', back_populates='browsing')
+    purchasing2 = relationship('Purchase_History', back_populates='browsing2')  # فعال شد و back_populates اضافه شد
+
 
 class Purchase_History(Base):
     __tablename__ = 'Purchase_History'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    # user_id = Column(Integer, ForeignKey('Users.user_id'))
-    # product_id = Column(Integer, ForeignKey('Browsing_History.product_id'))
-    user_id = Column(Integer)
-    product_id = Column(Integer)
-    quantity = Column(Integer)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    user_id = Column(Integer, ForeignKey('Users.user_id'), index=True)
+    product_id = Column(Integer, ForeignKey('Browsing_History.product_id'), index=True)
+    quantity = Column(Integer, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
 
-    # user2 = relationship('User', back_populates= 'purchasing')
-    # browsing2 = relationship('Browsing_History', 'purchasing2')
-    
-    
+    user2 = relationship('Users', back_populates='purchasing')
+    browsing2 = relationship('Browsing_History', back_populates='purchasing2')
+
+
 class Contextual_Signals(Base):
     __tablename__ = 'Contextual_Signals'
-    user_id = Column(Integer, primary_key=True)
-    timestamp = Column(DateTime)
-    device_type = Column(String)
-    season = Column(String)
-
+    user_id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, index=True)
+    device_type = Column(String, index=True)
+    season = Column(String, index=True)

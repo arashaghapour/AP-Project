@@ -7,8 +7,8 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List
 from .search import search_in_database
-
 Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
@@ -66,8 +66,8 @@ def get_all_products(db: Session = Depends(get_db)):
         browse_create['interaction_type'] = 'view'
         new_browse = models.Browsing_History(**browse_create)
         db.add(new_browse)
-        db.commit()
-        db.refresh(new_browse)
+    db.commit()
+    db.refresh(new_browse)
     return products
 
 
@@ -92,52 +92,7 @@ def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
 
 @app.post("/search", response_model=schemas.Product_out2)
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
-    products = db.query(models.Products).all()
-    product_list = []
-    purchase_list = []
-    browsed = []
-    for product in products:
-        product_dict = {
-            "product_id": product.product_id,
-            "name": product.name,
-            'brand': product.brand,
-            'category': product.category,
-            'skin_type': product.skin_types,
-            'concerns_targeted': product.concerns_targeted,
-            'ingredients': product.ingredients,
-            "price": product.price,
-            'rating': product.rating
-        }
-        product_list.append(product_dict)
-    purchase = db.query(models.Purchase_History).all()
-    for items in purchase:
-        purchase_dict = {
-            "user_id": items.user_id,
-            "product_id": items.product_id,
-            "quantity": items.quantity,
-            'timestamp': items.timestamp            
-        }
-        purchase_list.append(purchase_dict)
-    searches = db.query(models.Browsing_History).all()
-    for items in searches:
-        search_dict = {
-            "user_id": items.user_id,
-            "product_id": items.product_id,
-            'timestamp': items.timestamp            
-        }
-        browsed.append(search_dict)
-    users_dict = {}
-    all_users = []
-    users = db.query(models.Users).all()
-    for user in users:
-        users_dict = {
-            'user_id': user.user_id,
-            'skin_type': user.skin_type,
-            'consers': user.concers
-        }
-        all_users.append(users_dict)
-
-    search_result = search_in_database(user_in_code, product_list, search.search, purchase_list, browsed, all_users)
+    search_result = search_in_database(user_in_code, search.search)
     browse_create = {}
     count1 = 0
     count2 = 0
@@ -148,18 +103,16 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
         browse_create['interaction_type'] = 'view'
         new_browse = models.Browsing_History(**browse_create)
         db.add(new_browse)
-        db.commit()
-        db.refresh(new_browse)
         count1 += 1
         if count1 == 3:
             break
+    db.commit()
     for items in search_result['items']:
         submit_list.append(items)
         count2 += 1
         if count2 == 3:
             break
     return {'items': submit_list}
-
 
 @app.post("/add_admin", response_model=schemas.Admin)
 def create_user(user: schemas.Admin, db: Session = Depends(get_db)):

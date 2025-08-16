@@ -6,3 +6,5 @@ bcrypt
 pydantic
 passlib[bcrypt]
 python-jose[cryptography]
+
+
