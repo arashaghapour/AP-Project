@@ -49,7 +49,6 @@ def review_user(user: schemas.LoginRequest, db: Session = Depends(get_db)):
 @app.post("/add_product", response_model=schemas.ProductCreate)
 def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     product_data = product.dict()
-    print(product_data)
     new_product = models.Products(**product_data)
     db.add(new_product)
     db.commit()
