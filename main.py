@@ -7,10 +7,10 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List, Optional
 from .search import search_in_database
-from .routine import create_product, create_routine
-from .schemas import ProductCreate, ProductOut, QuizInput, RoutinePlanOut
+from .routin import create_product, create_routine
+from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
 from .utils import csv_to_list
-from .models import Product
+from .models import Products
 import requests
 
 
