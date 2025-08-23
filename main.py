@@ -96,7 +96,7 @@ def get_all_products(db: Session = Depends(get_db)):
         new_browse = models.Browsing_History(**browse_create)
         db.add(new_browse)
     db.commit()
-    db.refresh(new_browse)
+    # db.refresh(new_browse)
     return products
 
 

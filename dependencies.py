@@ -12,7 +12,7 @@ def get_current_user(token: HTTPAuthorizationCredentials = Depends(security)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     return payload
 
-
+                                    
 def admin_required(token: HTTPAuthorizationCredentials = Depends(security)):
     payload = verify_token(token.credentials)
     if payload is None or payload.get("role") != "admin":
