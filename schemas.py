@@ -98,6 +98,7 @@ class ProductCreate(BaseModel):
     ingredients: List[str]
     price: int
     rating: float
+    count: int
 
 class Product_out1(BaseModel):
     product_id: int
@@ -107,9 +108,10 @@ class Product_out1(BaseModel):
     skin_type: List[str]
     concerns_targeted: List[str]
     ingredients: List[str]
-    price: int
+    price: float
     rating: float
     response: str
+    count: int
 
 
 class Product_out2(BaseModel):
