@@ -7,17 +7,10 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List, Optional
 from .search import search_in_database
-<<<<<<< HEAD
-# from .routine import create_product, create_routine
-from .schemas import ProductCreate, QuizInput, RoutinePlanOut
-from .utils import csv_to_list
-# from .models import Product
-=======
 from .routin import create_product, create_routine
 from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
 from .utils import csv_to_list
 from .models import Products
->>>>>>> 86cffc5b1deaccfc594d92c622e9d8249ed211e6
 import requests
 
 
@@ -150,7 +143,7 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
             break
     return {'items': submit_list}
 
-@app.post("/add_admin", response_model=schemas.Admin)
+@app.post("/add_admin", response_model=schemas.Admin, tags=['Admin'])
 def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
     user_data = user.dict()
     user_data["password"] = pwd_context.hash(user.password)
@@ -191,13 +184,13 @@ def quiz_questions():
 #     db.refresh(quiz)
 
 #     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
-# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
-# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
-#     plans = []
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
-#         plans.append(routine)
-#     return plans
+@app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
+def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
+    plans = []
+    for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
+        routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
+        plans.append(routine)
+    return plans
 
 # @app.post('/quiz/selfie', tags=['Quiz'])
 # async def selfie_analyze(file: UploadFile= File(...), db: Session = Depends(get_db)):
