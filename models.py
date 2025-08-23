@@ -56,11 +56,12 @@ class Products(Base):
     skin_types = Column(JSON)
     concerns_targeted = Column(JSON)
     ingredients = Column(JSON)
-    price = Column(Numeric, index=True)
+    price = Column(Numeric(10, 2), index=True)
     rating = Column(Float, index=True)
     image_url = Column(String, nullable=True, index=True)
     tags = Column(JSON, index=True)
-
+    count = Column(Integer)
+    # price = Column(Numeric(10, 2))
 
 class Quiz_result(Base):
     __tablename__ = "Quiz_result"
@@ -137,6 +138,16 @@ class RoutinePlan(Base):
     plan_name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     steps = relationship("RoutineStep", back_populates="routine", cascade="all, delete-orphan")
+
+class RoutineStep(Base):
+    __tablename__ = "routine_steps"
+    id = Column(Integer, primary_key=True, index=True)
+    routine_id = Column(Integer, ForeignKey("routine_plans.id"))
+    step_number = Column(Integer, nullable=False)
+    description = Column(String, nullable=False)
+    product_id = Column(Integer, ForeignKey("Products.product_id"), nullable=True)
+
+    routine = relationship("RoutinePlan", back_populates="steps")
 
 class FinalResult(Base):
     __tablename__ = 'final_result'
