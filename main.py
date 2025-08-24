@@ -184,13 +184,98 @@ def quiz_questions():
 #     db.refresh(quiz)
 
 #     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
-@app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
-def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
+
+
+# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
+# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
+#     plans = []
+#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
+#         routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
+#         plans.append(routine)
+#     return plans
+# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
+# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
+#     plans = []
+#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
+#         routine = create_routine(
+#             db, 
+#             data.user_id, 
+#             plan_name, 
+#             data.skin_type, 
+#             data.concerns, 
+#             data.preferences, 
+#             data.budget_range
+#         )
+
+        
+#         steps_out = [
+#             RoutineStepOut(
+#                 step_name=step.description,   
+#                 product_name=step.product_name
+#             )
+#             for step in routine.steps
+#         ]
+
+#         plans.append(RoutinePlanOut(
+#             id=routine.id,
+#             name=routine.name,
+#             steps=steps_out
+#         ))
+
+#     return plans
+
+
+def create_routine(db: Session, user_id: int, plan_name: str, skin_type: str, concerns: list, preferences: list, budget_range: str):
+    routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
+    db.add(routine)
+    db.commit()
+    db.refresh(routine)
+
+    
+    sample_steps = [
+        {"description": "Cleanse", "product_name": "Cleanser"},
+        {"description": "Moisturize", "product_name": "Moisturizer"},
+        {"description": "Sunscreen", "product_name": "SPF 50"}
+    ]
+
+    for i, step in enumerate(sample_steps, start=1):
+        db_step = models.RoutineStep(
+            routine_id=routine.id,
+            step_number=i,
+            description=step["description"],
+            product_name=step["product_name"]
+        )
+        db.add(db_step)
+
+    db.commit()
+    db.refresh(routine)
+    return routine
+
+@app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags= ['Routine'])
+def generate_routine(data: schemas.QuizInput, db: Session = Depends(get_db)):
     plans = []
     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
         routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
-        plans.append(routine)
+
+       
+        steps_out = [
+            schemas.RoutineStepOut(step_name=step.description, product_name=step.product_name)
+            for step in routine.steps
+        ]
+
+        plan_out = schemas.RoutinePlanOut(
+            id=routine.id,
+            user_id=routine.user_id,
+            plan_name=routine.plan_name,
+            created_at=routine.created_at,
+            steps=steps_out
+        )
+        plans.append(plan_out)
+
     return plans
+
+
+
 
 # @app.post('/quiz/selfie', tags=['Quiz'])
 # async def selfie_analyze(file: UploadFile= File(...), db: Session = Depends(get_db)):

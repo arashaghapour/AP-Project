@@ -91,13 +91,13 @@ class QuizQuestions(Base):
     q10 = Column(String, index=True)
 
 
-class Routine_Plans(Base):
-    __tablename__ = "Routine_Plans"
-    routine_id = Column(Integer, primary_key=True, unique=True, index=True)
-    user_id = Column(Integer, index=True)
-    plan_name = Column(String, index=True)
-    steps = Column(JSON, index=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+# class Routine_Plans(Base):
+#     __tablename__ = "Routine_Plans"
+#     routine_id = Column(Integer, primary_key=True, unique=True, index=True)
+#     user_id = Column(Integer, index=True)
+#     plan_name = Column(String, index=True)
+#     steps = Column(JSON, index=True)
+#     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
 
 class Browsing_History(Base):
@@ -146,7 +146,7 @@ class RoutineStep(Base):
     step_number = Column(Integer, nullable=False)
     description = Column(String, nullable=False)
     product_id = Column(Integer, ForeignKey("Products.product_id"), nullable=True)
-
+    product_name = Column(String)
     routine = relationship("RoutinePlan", back_populates="steps")
 
 class FinalResult(Base):
