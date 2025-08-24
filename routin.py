@@ -52,9 +52,12 @@ def select_best_product(db: Session, category: str, skin_type: str, concerns: Li
     # lo, hi = budget
     if isinstance(budget, (list, tuple)) and len(budget) == 2:
         lo, hi = budget
+    elif isinstance(budget, (list, tuple)) and len(budget) == 1:
+        lo = 0
+        hi = budget[0]
     else:
         lo = 0
-        hi = budget
+        hi = float(budget)
 
     products = list_products(db, category=category, price_range=(lo, hi))
     if not products:
@@ -71,9 +74,10 @@ def create_routine(db: Session, user_id: Optional[int], plan_name: str, skin_typ
         product = select_best_product(db, step, skin_type, concerns, preferences, budget)
         db.add(RoutineStep(
             routine_id=routine.id,
-            step_name=step,
+            step_number=len(routine.steps) + 1,
             product_id=product.id if product else None,
-            product_name=product.name if product else None
+            product_name=product.name if product else None,
+            description= step
         ))
     db.commit()
     db.refresh(routine)

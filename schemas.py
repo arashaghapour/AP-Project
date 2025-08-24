@@ -202,8 +202,10 @@ class QuizInput(BaseModel):
 
 class RoutineStepOut(BaseModel):
     step_name: str
-    product_id: Optional[int]
-    product_name: Optional[str]
+    # product_id: Optional[int]
+    product_name: Optional[str] = None
+    class Config:
+        orm_mode = True
 
 class RoutinePlanOut(BaseModel):
     id: int
