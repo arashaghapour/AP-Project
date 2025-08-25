@@ -92,7 +92,7 @@ class ProductCreate(BaseModel):
     product_id: int
     name: str
     brand: str
-    category: List[str]
+    category: str
     skin_types: List[str]
     concerns_targeted: List[str]
     ingredients: List[str]
@@ -215,4 +215,4 @@ class RoutinePlanOut(BaseModel):
     steps: List[RoutineStepOut]
 
     class Config:
-        from_attributes = True
+        orm_mode = True

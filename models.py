@@ -38,7 +38,7 @@ class Users(Base):
 
     browsing = relationship('Browsing_History', back_populates='user')
     quiz = relationship('Quiz_result', back_populates='user2')
-    purchasing = relationship('Purchase_History', back_populates='user2')  # فعال شد و back_populates اضافه شد
+    purchasing = relationship('Purchase_History', back_populates='user2')  
 
 
 class Admins(Base):
@@ -109,7 +109,7 @@ class Browsing_History(Base):
     interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False, index=True)
 
     user = relationship('Users', back_populates='browsing')
-    purchasing2 = relationship('Purchase_History', back_populates='browsing2')  # فعال شد و back_populates اضافه شد
+    purchasing2 = relationship('Purchase_History', back_populates='browsing2')  
 
 
 class Purchase_History(Base):
