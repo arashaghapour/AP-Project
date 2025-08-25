@@ -6,9 +6,4 @@ bcrypt
 pydantic
 passlib[bcrypt]
 python-jose[cryptography]
-<<<<<<< HEAD
 requests
-
-=======
-requests
->>>>>>> 02b8b8a0913e91678ecff42f3021fbde7cb55e48

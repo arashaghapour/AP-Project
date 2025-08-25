@@ -12,7 +12,7 @@ from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
 from .utils import csv_to_list
 from .models import Products
 import requests
-
+from .add_product_to_routin import choose_products as chp
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -224,21 +224,16 @@ def quiz_questions():
 
 #     return plans
 
-
-def create_routine(db: Session, user_id: int, plan_name: str, skin_type: str, concerns: list, preferences: list, budget_range: str):
+def create_routine(db: Session, user_id: int, plan_name: str,
+                   skin_type: str, concerns: list, preferences: list, budget_range: str):
     routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
     db.add(routine)
     db.commit()
     db.refresh(routine)
 
-    
-    sample_steps = [
-        {"description": "Cleanse", "product_name": "Cleanser"},
-        {"description": "Moisturize", "product_name": "Moisturizer"},
-        {"description": "Sunscreen", "product_name": "SPF 50"}
-    ]
+    steps = chp(db, skin_type, concerns, preferences)
 
-    for i, step in enumerate(sample_steps, start=1):
+    for i, step in enumerate(steps, start=1):
         db_step = models.RoutineStep(
             routine_id=routine.id,
             step_number=i,
