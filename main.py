@@ -7,12 +7,11 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List, Optional
 from .search import search_in_database
-from .routin import create_product, create_routine
 from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
 from .utils import csv_to_list
 from .models import Products
 import requests
-from .add_product_to_routin import choose_products as chp
+from .add_product_to_routin import choose_products 
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -224,21 +223,26 @@ def quiz_questions():
 
 #     return plans
 
+from . import models
+
+
 def create_routine(db: Session, user_id: int, plan_name: str,
-                   skin_type: str, concerns: list, preferences: list, budget_range: str):
+                   skin_type: str, concerns: list, preferences: list, budget_range: list):
     routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
     db.add(routine)
     db.commit()
     db.refresh(routine)
 
-    steps = chp(db, skin_type, concerns, preferences)
+    steps = choose_products(db, skin_type, concerns, preferences, plan_name, budget_range)
 
-    for i, step in enumerate(steps, start=1):
+    for step in steps:
         db_step = models.RoutineStep(
             routine_id=routine.id,
-            step_number=i,
+            step_number=step["step_number"],
             description=step["description"],
-            product_name=step["product_name"]
+            product_id=step.get("product_id"),
+            product_name=step.get("product_name"),
+            price=step.get("price")
         )
         db.add(db_step)
 
@@ -246,15 +250,25 @@ def create_routine(db: Session, user_id: int, plan_name: str,
     db.refresh(routine)
     return routine
 
-@app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags= ['Routine'])
+@app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
 def generate_routine(data: schemas.QuizInput, db: Session = Depends(get_db)):
     plans = []
     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-        routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
+        routine = create_routine(
+            db,
+            data.user_id,
+            plan_name,
+            data.skin_type,
+            data.concerns,
+            data.preferences,
+            data.budget_range
+        )
 
-       
         steps_out = [
-            schemas.RoutineStepOut(step_name=step.description, product_name=step.product_name)
+            schemas.RoutineStepOut(
+                step_name=step.description,
+                product_name=step.product_name
+            )
             for step in routine.steps
         ]
 

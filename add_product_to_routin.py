@@ -1,29 +1,60 @@
-def choose_products(db, skin_type: str, concerns: list, preferences: list):
-    steps = []
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from .models import Products
 
-    if skin_type == "oily":
-        product = db.query(models.Products).filter(models.Products.category == "cleanser", models.Products.tags.contains(["oil_control"])).first()
-        steps.append({"description": "Cleanse", "product_name": product.name if product else "Foaming Cleanser"})
-    elif skin_type == "dry":
-        product = db.query(models.Products).filter(models.Products.category == "cleanser", models.Products.tags.contains(["hydrating"])).first()
-        steps.append({"description": "Cleanse", "product_name": product.name if product else "Cream Cleanser"})
-    else:
-        steps.append({"description": "Cleanse", "product_name": "Gentle Cleanser"})
+def choose_products(
+    db: Session,
+    skin_types: list,
+    concerns: list,
+    preferences: list,
+    plan_name: str,
+    budget_range: list
+):
+    routine_steps = []
 
-    if "acne" in concerns:
-        product = db.query(models.Products).filter(models.Products.category == "serum", models.Products.ingredients.contains(["salicylic acid"])).first()
-        steps.append({"description": "Serum", "product_name": product.name if product else "Anti-Acne Serum"})
-    elif "wrinkles" in concerns:
-        product = db.query(models.Products).filter(models.Products.category == "serum", models.Products.ingredients.contains(["retinol"])).first()
-        steps.append({"description": "Serum", "product_name": product.name if product else "Anti-Aging Serum"})
+    if plan_name == "Full Plan":
+        base_routine = ["cleanser", "toner", "serum", "moisturizer", "sunscreen"]
+    elif plan_name == "Hydration Plan":
+        base_routine = ["cleanser", "serum", "moisturizer", "mask/sunscreen"]
+    else: 
+        base_routine = ["cleanser", "moisturizer", "sunscreen"]
 
-    if "dry" in skin_type or "hydration" in concerns:
-        product = db.query(models.Products).filter(models.Products.category == "moisturizer", models.Products.tags.contains(["hydrating"])).first()
-        steps.append({"description": "Moisturize", "product_name": product.name if product else "Hydrating Moisturizer"})
-    else:
-        steps.append({"description": "Moisturize", "product_name": "Lightweight Moisturizer"})
+    for idx, step in enumerate(base_routine, start=1):
+        query = db.query(Products).filter(
+            Products.price >= budget_range[0],
+            Products.price <= budget_range[1]
+        )
+        query = query.filter(Products.category.contains([step]))
 
-    product = db.query(models.Products).filter(models.Products.category == "sunscreen").first()
-    steps.append({"description": "Sunscreen", "product_name": product.name if product else "SPF 50"})
+        if skin_types:
+            skin_filters = [Products.skin_types.contains([st]) for st in skin_types]
+            query = query.filter(or_(*skin_filters))
 
-    return steps
+        if concerns:
+            concern_filters = [Products.concerns_targeted.contains([c]) for c in concerns]
+            query = query.filter(or_(*concern_filters))
+
+        products = query.all()
+
+        if products:
+            for prod_idx, prod in enumerate(products, start=1):
+                routine_steps.append({
+                    "step_number": idx,
+                    "step_name": f"Option {prod_idx}: Use {prod.name} for {step}",
+                    "description": f"A {', '.join(prod.category)} suitable for {', '.join(prod.skin_types)} skin targeting {', '.join(prod.concerns_targeted)}.",
+                    "product_id": prod.product_id,
+                    "product_name": prod.name,
+                    "price": float(prod.price)
+                })
+        else:
+    
+            routine_steps.append({
+                "step_number": idx,
+                "step_name": f"No suitable product found in budget {budget_range} for skin {', '.join(skin_types)} targeting {', '.join(concerns)}.",
+                "description": "No product available",
+                "product_id": None,
+                "product_name": None,
+                "price": None
+            })
+
+    return routine_steps

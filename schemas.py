@@ -194,16 +194,18 @@ class QuizResult(BaseModel):
     timestamp :datetime
 
 class QuizInput(BaseModel):
-    user_id: Optional[int] = None
-    skin_type: str
-    concerns: List[str] = Field(default_factory=list)
-    preferences: List[str] = Field(default_factory=list)
-    budget_range: List[float] = Field(default_factory=lambda: [0, 999])
+    user_id: int = Field(..., example=1)
+    skin_type: str = Field(..., example="oily")
+    concerns: List[str] = Field(default_factory=list, example=["acne", "wrinkles"])
+    preferences: List[str] = Field(default_factory=list, example=["vegan", "fragrance_free"])
+    budget_range: List[float] = Field(default_factory=lambda: [0, 999], example=[100, 500])
+
 
 class RoutineStepOut(BaseModel):
     step_name: str
-    # product_id: Optional[int]
+    product_id: Optional[int] = None
     product_name: Optional[str] = None
+    price: Optional[float] = None
     class Config:
         orm_mode = True
 
@@ -215,4 +217,4 @@ class RoutinePlanOut(BaseModel):
     steps: List[RoutineStepOut]
 
     class Config:
-        orm_mode = True
+        free_attribute = True
