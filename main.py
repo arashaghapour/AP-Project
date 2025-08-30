@@ -8,7 +8,6 @@ from .token_utils import create_access_token
 from typing import List, Optional
 from .search import search_in_database
 from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
-from .utils import csv_to_list
 from .models import Products
 import requests
 from .add_product_to_routin import choose_products 
@@ -301,17 +300,17 @@ def generate_routine(data: schemas.QuizInput, db: Session = Depends(get_db)):
 #         return {'error': response.text}
 
 @app.post('/quiz/submit', tags=['Quiz'])
-async def submitting_quiz(user_id: int = Form(...),
-                          q1: str = Form(...),
-                          q2: str = Form(...),
-                          q3: str = Form(...),
-                          q4: str = Form(...),
-                          q5: str = Form(...),
-                          q6: str = Form(...),
-                          q7: str = Form(...),
-                          q8: str = Form(...),
-                          q9: str = Form(...),
-                          q10: str = Form(...), db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+async def submitting_quiz(
+                  q1: str = Form(...),
+                  q2: str = Form(...),
+                  q3: str = Form(...),
+                  q4: str = Form(...),
+                  q5: str = Form(...),
+                  q6: str = Form(...),
+                  q7: str = Form(...),
+                  q8: str = Form(...),
+                  q9: str = Form(...),
+                  q10: str = Form(...), db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
     selfie_result = {}
     if file is not None:
         if not file.content_type.startswith("image/"):
@@ -338,14 +337,22 @@ async def submitting_quiz(user_id: int = Form(...),
         "q9": q9,
         "q10": q10,
     }
-    quiz_result = utils.analyze_quiz(answers)
 
+
+    quiz_result = utils.analyze_quiz(answers)
+    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
+                         'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
+    print(complete_database)
+    user_skin_property = models.Users(**complete_database)
+    db.add(user_skin_property)
+    db.commit()
+    db.refresh(user_skin_property)
     if selfie_result:
         final_result_data = merge_results(selfie_result, quiz_result)
     else:
         final_result_data = quiz_result
 
-    final = models.FinalResult(user_id=user_id,
+    final = models.FinalResult(user_id=user_in_code,
                                selfie_result=selfie_result,
                                quiz_result=quiz_result,
                                final_result=final_result_data)

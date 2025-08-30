@@ -4,6 +4,7 @@ from .database import Base
 from datetime import datetime
 from enum import Enum
 from sqlalchemy.orm import relationship
+from datetime import datetime
 
 
 class skin_type_allowed(str, Enum):
@@ -35,11 +36,13 @@ class Users_for_sign_up(Base):
 
 class Users(Base):
     __tablename__ = "Users"
-    user_id = Column(Integer, primary_key=True, index=True)
-    skin_type = Column(SqllEnum(skin_type_allowed), nullable=False, index=True)
-    concers = Column(JSON)
+    user_id = Column(Integer, primary_key=True)
+    password = Column(String)
+    skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
+    concerns = Column(JSON)
     preferences = Column(JSON)
-    created_at = Column(DateTime, index=True)
+    device_type = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
     browsing = relationship('Browsing_History', back_populates='user')
     quiz = relationship('Quiz_result', back_populates='user2')
     purchasing = relationship('Purchase_History', back_populates='user2')  

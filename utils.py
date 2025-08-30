@@ -20,11 +20,11 @@ def analyze_quiz(answers: dict) -> dict:
     if answers.get("q6") == "yes":
         concerns.append("dark_spots")
 
-    preferences = {
-        "time": answers.get("q7"),
-        "steps": answers.get("q8"),
-        "products": answers.get("q9")
-    }
+    preferences = [
+        ["time", answers.get("q7")],
+        ["steps", answers.get("q8")],
+        ["products", answers.get("q9")]
+    ]
 
     return {
         "skin_type": skin_type,
@@ -32,12 +32,3 @@ def analyze_quiz(answers: dict) -> dict:
         "preferences": preferences
     }
 
-
-def csv_to_list(s: str):
-    if not s:
-        return []
-    return [x.strip().lower() for x in s.split(",") if x.strip()]
-
-
-def list_to_csv(lst: list):
-    return ",".join(sorted(set([x.strip().lower() for x in lst if x.strip()])))
