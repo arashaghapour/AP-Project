@@ -81,11 +81,7 @@ class Q10Options(str, Enum):
 class UserCreate(BaseModel):
     user_id: int
     password: str
-    skin_type: str
-    concers: List[str]
-    preferences: List[str]
-    device_type: str
-    created_at: datetime
+
 
 
 class ProductCreate(BaseModel):

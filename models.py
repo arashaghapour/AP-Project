@@ -26,16 +26,20 @@ class interaction_type_allowed(str, Enum):
     cart = 'cart'
 
 
+class Users_for_sign_up(Base):
+    __tablename__ = "Users sign up"
+    user_id = Column(Integer, primary_key=True, index=True)
+    password = Column(String, primary_key=True)
+    created_at = Column(DateTime, index=True)
+
+
 class Users(Base):
     __tablename__ = "Users"
     user_id = Column(Integer, primary_key=True, index=True)
-    password = Column(String, index=True)
     skin_type = Column(SqllEnum(skin_type_allowed), nullable=False, index=True)
     concers = Column(JSON)
     preferences = Column(JSON)
-    device_type = Column(String, index=True)
     created_at = Column(DateTime, index=True)
-
     browsing = relationship('Browsing_History', back_populates='user')
     quiz = relationship('Quiz_result', back_populates='user2')
     purchasing = relationship('Purchase_History', back_populates='user2')  

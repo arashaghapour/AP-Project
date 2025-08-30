@@ -47,7 +47,7 @@ def merge_results(selfie_result: dict, quiz_result: dict) -> dict:
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     user_data = user.dict()
     user_data["password"] = pwd_context.hash(user.password)
-    new_user = models.Users(**user_data)
+    new_user = models.Users_for_sign_up(**user_data)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -59,9 +59,9 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/Account/login", tags=['Account'] , response_model=schemas.Token)
-def review_user(user: schemas.LoginRequest, db: Session = Depends(get_db)):
+def review_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     global user_in_code
-    user_review = db.query(models.Users).filter(models.Users.user_id == user.user_id).first()
+    user_review = db.query(models.Users_for_sign_up).filter(models.Users_for_sign_up.user_id == user.user_id).first()
     admin_review = db.query(models.Admins).filter(models.Admins.user_id == user.user_id).first()
     if user_review and pwd_context.verify(user.password, user_review.password):
         user_in_code = user_review.user_id
@@ -228,12 +228,12 @@ from . import models
 
 def create_routine(db: Session, user_id: int, plan_name: str,
                    skin_type: str, concerns: list, preferences: list, budget_range: list):
-    routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
-    db.add(routine)
-    db.commit()
-    db.refresh(routine)
+    # routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
+    # db.add(routine)
+    # db.commit()
+    # db.refresh(routine)
 
-    steps = choose_products(db, skin_type, concerns, preferences, plan_name, budget_range)
+    steps = choose_products(db, +skin_type, concerns, preferences, plan_name, budget_range)
 
     for step in steps:
         db_step = models.RoutineStep(
@@ -253,6 +253,7 @@ def create_routine(db: Session, user_id: int, plan_name: str,
 @app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
 def generate_routine(data: schemas.QuizInput, db: Session = Depends(get_db)):
     plans = []
+    
     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
         routine = create_routine(
             db,
