@@ -250,7 +250,7 @@ def create_routine(db: Session, user_id: int, plan_name: str,
     return routine
 
 @app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
-def generate_routine(data: schemas.QuizInput, db: Session = Depends(get_db)):
+def generate_routine(db: Session = Depends(get_db), budget_range: str = Form(...)):
     plans = []
     
     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
@@ -310,7 +310,8 @@ async def submitting_quiz(
                   q7: str = Form(...),
                   q8: str = Form(...),
                   q9: str = Form(...),
-                  q10: str = Form(...), db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+                  q10: str = Form(...),
+                  budget: int = Form, db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
     selfie_result = {}
     if file is not None:
         if not file.content_type.startswith("image/"):

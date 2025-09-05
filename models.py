@@ -43,6 +43,7 @@ class Users(Base):
     preferences = Column(JSON)
     device_type = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
+    budget_range = Column(Integer)
     browsing = relationship('Browsing_History', back_populates='user')
     quiz = relationship('Quiz_result', back_populates='user2')
     purchasing = relationship('Purchase_History', back_populates='user2')  

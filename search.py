@@ -7,7 +7,7 @@ def search_in_database(user_in_code, searched_item):
                         'rating': 22, 'name': 283, 'brand': 281,
                         'purchase': 41,'searched': 13, 'close': 31,
                         'most_view': 53, 'skin_type': 90, 'user_skin_type': 43, 'user_concerns': 47,
-                        'searched_skin_type': 297, 'searched_concerns': 294, 'searched_category': 292}
+                        'searched_skin_type': 297, 'searched_concerns': 294, 'searched_category': 292, 'budge_range': 53}
     
     concerns_labels = {'acne': 10,'combination': 12 ,'dullness': 14}
     category = {'cleanser': 10, 'moisturizer': 12, 'serum': 20}
@@ -30,9 +30,10 @@ def search_in_database(user_in_code, searched_item):
         parameters_score['searched_skin_type']: 'it because you have searched this skin types.',
         parameters_score['searched_concerns']: 'it because you have searched this concerns.',
         parameters_score['searched_category']: 'it because you have searched this concerns.',
+        parameters_score['budge_range']: 'it because you have budge range.'
     }
 
-    conn = lite.connect('./AP-Project/database.db')
+    conn = lite.connect('/home/arash/Desktop/ap/database.db')
     cursor = conn.cursor()
     results = []
     output = []
@@ -121,9 +122,12 @@ def search_in_database(user_in_code, searched_item):
         for i, j in views.items():
             products_scores[i].append(parameters_score['most_view'])
             break
-
+        user_budget = user_budget_range(cursor, user_in_code)
         for id, scores_list in products_scores.items():
             products_scores[id].append(round(product_rating(cursor, id) * parameters_score['rating'], 2))
+            if user_budget[0] < product_price(cursor, id) < user_budget[1]:
+                products_scores[id].append(parameters_score['user_budget'])
+
 
         list_of_products = []
         for id, scores_list in products_scores.items():
@@ -166,8 +170,6 @@ def search_in_database(user_in_code, searched_item):
                 if max(products_scores[list_of_products[-1][0]]) % values == 0:
                     list_of_products[-1].append(reasons_of_parameters[values])
         list_of_products.sort(key=lambda j: j[1], reverse=True)
-        print(list_of_products)
-        print(products_scores)
         count1 = 0
         for item in list_of_products:
             if item[1] == 0:
@@ -224,6 +226,10 @@ def product_information(cursor, product_id):
     row[6] = json.loads(row[6])
     return row
 
+def product_price(cursor, product_id):
+    cursor.execute("select price from Products where product_id = ?", (product_id, ))
+    return cursor.fetchone()[0]
+
 def product_rating(cursor, product_id):
     cursor.execute("select rating from Products where product_id = ?", (product_id, ))
     return cursor.fetchone()[0]
@@ -248,3 +254,7 @@ def get_column(cursor):
     cursor.execute("SELECT product_id FROM Products")
     columns = [i[0] for i in cursor.fetchall()]
     return columns
+
+def user_budget_range(cursor, user_in_code):
+    cursor.execute("select budget_range from Users where user_id = ?", (user_in_code, ))
+    return cursor.fetchall()
