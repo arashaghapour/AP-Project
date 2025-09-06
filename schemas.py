@@ -79,13 +79,12 @@ class Q10Options(str, Enum):
     never = "never"
 
 class UserCreate(BaseModel):
-    user_id: int
+    user_name: str
     password: str
 
 
 
 class ProductCreate(BaseModel):
-    product_id: int
     name: str
     brand: str
     category: str

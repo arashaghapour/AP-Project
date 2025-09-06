@@ -33,7 +33,7 @@ def search_in_database(user_in_code, searched_item):
         parameters_score['budge_range']: 'it because you have budge range.'
     }
 
-    conn = lite.connect('/home/arash/Desktop/ap/database.db')
+    conn = lite.connect('.database.db')
     cursor = conn.cursor()
     results = []
     output = []

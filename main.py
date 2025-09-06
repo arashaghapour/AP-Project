@@ -11,6 +11,7 @@ from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
 from .models import Products
 import requests
 from .add_product_to_routin import choose_products 
+import sqlite3
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -20,6 +21,15 @@ AILAB_API_KEY = "cmea2907w0001jo041hntvzpp"
 AILAB_URL = "https://api.ailabtools.com/skin/analyze"
 user_in_code = None
 
+
+def read_database():
+    conn = sqlite3.connect('./database.db')
+    cursor = conn.cursor()
+    return cursor
+
+
+def find_user_id(cursor, user_name):
+    cursor.execute('SELECT user_id FROM [Users_sign_up] WHERE user_name = ?', (user_name,))
 
 def merge_results(selfie_result: dict, quiz_result: dict) -> dict:
     skin_type_selfie = selfie_result.get("skin_type")
@@ -50,10 +60,12 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    token_data = {"sub": str(user.user_id), "role": 'normal user'} 
+    token_data = {"sub": str(user.user_name), "role": 'normal user'} 
     token = create_access_token(token_data)
     global user_in_code
-    user_in_code = user_data['user_id']
+    cursor = read_database()
+    user_id = find_user_id(cursor, user.user_name)
+    user_in_code = user_id
     return {"message": "user created", "access_token": token, "token_type": "bearer"}
 
 

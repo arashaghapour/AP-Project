@@ -1,3 +1,4 @@
 liberaries
 *.pyc
 .idea/
+*.db

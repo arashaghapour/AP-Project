@@ -28,10 +28,11 @@ class interaction_type_allowed(str, Enum):
 
 
 class Users_for_sign_up(Base):
-    __tablename__ = "Users sign up"
-    user_id = Column(Integer, primary_key=True, index=True)
-    password = Column(String, primary_key=True)
-    created_at = Column(DateTime, index=True)
+    __tablename__ = "Users_sign_up"
+    user_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    user_name = Column(String, index=True)
+    password = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class Users(Base):
@@ -57,7 +58,7 @@ class Admins(Base):
 
 class Products(Base):
     __tablename__ = "Products"
-    product_id = Column(Integer, primary_key=True, index=True)
+    product_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
     brand = Column(String, index=True)
     category = Column(JSON, nullable=False)    
