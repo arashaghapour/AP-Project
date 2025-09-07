@@ -46,7 +46,6 @@ class Users(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     budget_range = Column(Integer)
     browsing = relationship('Browsing_History', back_populates='user')
-    quiz = relationship('final_result', back_populates='user2')
     purchasing = relationship('Purchase_History', back_populates='user2')  
 
     cart_items = relationship("Cart", back_populates="user")
@@ -72,6 +71,7 @@ class Products(Base):
     rating = Column(Float, index=True)
     image_url = Column(String, nullable=True, index=True)
     tags = Column(JSON, index=True)
+    count = Column(Integer)
     stock = Column(Integer, default=0, nullable=False)
     Status = Column(Boolean, default=True)
 
@@ -187,5 +187,3 @@ class FinalResult(Base):
     skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
     concerns = Column(JSON)
     preferences = Column(JSON)
-
-    user2 = relationship('Users', back_populates='quiz')

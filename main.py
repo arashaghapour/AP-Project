@@ -434,7 +434,7 @@ async def submitting_quiz(
     }
 
 
-    # quiz_result = utils.analyze_quiz(answers)
+    quiz_result = utils.analyze_quiz(answers)
     # complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
     #                      'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
     # print(complete_database)
@@ -454,14 +454,10 @@ async def submitting_quiz(
     conn, cursor = read_database()
     cursor.execute('delete from Users where user_id = ?', (user_in_code, ))
     conn.commit()
-    quiz_result = utils.analyze_quiz(answers)
-    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
-                         'preferences': quiz_result['preferences'], 'device_type': 'mobile', 'budget_range': budget}
     
-    user_skin_property = models.Users(**complete_database)
-    db.add(user_skin_property)
-    db.commit()
-    db.refresh(user_skin_property)
+
+    
+
     
     # final = models.FinalResult(user_id=user_in_code,
     #                            selfie_result=selfie_result,
@@ -475,6 +471,12 @@ async def submitting_quiz(
     db.add(final)
     db.commit()
     db.refresh(final)
+    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': final_result_data['skin_type'], 'concerns': final_result_data['concerns'],
+                         'preferences': final_result_data['preferences'], 'device_type': 'mobile', 'budget_range': budget}
+    user_skin_property = models.Users(**complete_database)
+    db.add(user_skin_property)
+    db.commit()
+    db.refresh(user_skin_property)
     return {
         "final_result_id": final.id,
         "final_result": final_result_data,
