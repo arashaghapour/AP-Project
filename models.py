@@ -96,7 +96,7 @@ class Quiz_result(Base):
     preferences = Column(JSON)
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
 
-    user2 = relationship('Users', back_populates='quiz')
+    # user2 = relationship('Users', back_populates='quiz')
 
 
 class QuizQuestions(Base):
@@ -180,6 +180,11 @@ class FinalResult(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False)
-    selfie_result = Column(JSON, nullable=True)
-    quiz_result = Column(JSON, nullable=False)
-    final_result = Column(JSON, nullable=False)
+    # selfie_result = Column(JSON, nullable=True)
+    # quiz_result = Column(JSON, nullable=False)
+    # final_result = Column(JSON, nullable=False)
+    skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
+    concerns = Column(JSON)
+    preferences = Column(JSON)
+
+    user2 = relationship('Users', back_populates='quiz')

@@ -418,14 +418,23 @@ async def submitting_quiz(
     db.refresh(user_skin_property)
     if selfie_result:
         final_result_data = merge_results(selfie_result, quiz_result)
+        # final = models.FinalResult(user_id = user_in_code, 
+        #                        skin_type = final_result_data['skin_type'],
+        #                        concerns = final_result_data['concerns'],
+        #                        preferences = final_result_data['preferences'])
     else:
         final_result_data = quiz_result
+        
 
-    final = models.FinalResult(user_id=user_in_code,
-                               selfie_result=selfie_result,
-                               quiz_result=quiz_result,
-                               final_result=final_result_data)
-
+    # final = models.FinalResult(user_id=user_in_code,
+    #                            selfie_result=selfie_result,
+    #                            quiz_result=quiz_result,
+    #                            final_result=final_result_data)
+    
+    final = models.FinalResult(user_id = user_in_code, 
+                               skin_type = final_result_data['skin_type'],
+                               concerns = final_result_data['concerns'],
+                               preferences = final_result_data['preferences'])
     db.add(final)
     db.commit()
     db.refresh(final)
