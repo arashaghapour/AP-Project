@@ -408,14 +408,14 @@ async def submitting_quiz(
     }
 
 
-    quiz_result = utils.analyze_quiz(answers)
-    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
-                         'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
-    print(complete_database)
-    user_skin_property = models.Users(**complete_database)
-    db.add(user_skin_property)
-    db.commit()
-    db.refresh(user_skin_property)
+    # quiz_result = utils.analyze_quiz(answers)
+    # complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
+    #                      'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
+    # print(complete_database)
+    # user_skin_property = models.Users(**complete_database)
+    # db.add(user_skin_property)
+    # db.commit()
+    # db.refresh(user_skin_property)
     if selfie_result:
         final_result_data = merge_results(selfie_result, quiz_result)
         # final = models.FinalResult(user_id = user_in_code, 
@@ -426,6 +426,15 @@ async def submitting_quiz(
         final_result_data = quiz_result
         
 
+    quiz_result = utils.analyze_quiz(answers)
+    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': final_result_data['skin_type'], 'concerns': final_result_data['concerns'],
+                         'preferences': final_result_data['preferences'], 'device_type': 'mobile'}
+    # print(complete_database)
+    user_skin_property = models.Users(**complete_database)
+    db.add(user_skin_property)
+    db.commit()
+    db.refresh(user_skin_property)
+    
     # final = models.FinalResult(user_id=user_in_code,
     #                            selfie_result=selfie_result,
     #                            quiz_result=quiz_result,
