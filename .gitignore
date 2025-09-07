@@ -2,3 +2,4 @@ liberaries
 *.pyc
 .idea/
 *.db
+test.py

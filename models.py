@@ -30,14 +30,14 @@ class interaction_type_allowed(str, Enum):
 class Users_for_sign_up(Base):
     __tablename__ = "Users_sign_up"
     user_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    user_name = Column(String, index=True)
+    user_name = Column(String, unique=True,index=True)
     password = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
 class Users(Base):
     __tablename__ = "Users"
-    user_id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, unique=True, primary_key=True)
     password = Column(String)
     skin_type = Column(SqllEnum(skin_type_allowed), nullable=False)
     concerns = Column(JSON)
@@ -54,8 +54,9 @@ class Users(Base):
 
 class Admins(Base):
     __tablename__ = "Admins"
-    user_id = Column(Integer, primary_key=True, index=True)
-    password = Column(String, primary_key=True, index=True)
+    user_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    user_name = Column(Integer, index=True)
+    password = Column(String, index=True)
 
 
 class Products(Base):
@@ -63,7 +64,7 @@ class Products(Base):
     product_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True)
     brand = Column(String, index=True)
-    category = Column(JSON, nullable=False)    
+    category = Column(String, nullable=False)    
     skin_types = Column(JSON, nullable=False)        
     concerns_targeted = Column(JSON, nullable=False) 
     ingredients = Column(JSON, nullable=True) 

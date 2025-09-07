@@ -1,11 +1,6 @@
-import sqlite3 as lite
-import json
-conn = lite.connect('./database.db')
+import sqlite3
+conn = sqlite3.connect('./database.db')
 cursor = conn.cursor()
-
-skin_types = ["oily"]
-cursor.execute(
-    "UPDATE Products SET skin_types = ? WHERE product_id = ?",
-    (json.dumps(skin_types), 3)
-)
+cursor.execute('delete from Users where user_id = ?', (1, ))
 conn.commit()
+conn.close()
