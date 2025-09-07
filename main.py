@@ -237,63 +237,63 @@ def quiz_questions():
 from . import models
 
 
-def create_routine(db: Session, user_id: int, plan_name: str,
-                   skin_type: str, concerns: list, preferences: list, budget_range: list):
-    # routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
-    # db.add(routine)
-    # db.commit()
-    # db.refresh(routine)
+# def create_routine(db: Session, user_id: int, plan_name: str,
+#                    skin_type: str, concerns: list, preferences: list, budget_range: list):
+#     # routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
+#     # db.add(routine)
+#     # db.commit()
+#     # db.refresh(routine)
 
-    steps = choose_products(db, +skin_type, concerns, preferences, plan_name, budget_range)
+#     steps = choose_products(db, +skin_type, concerns, preferences, plan_name, budget_range)
 
-    for step in steps:
-        db_step = models.RoutineStep(
-            routine_id=routine.id,
-            step_number=step["step_number"],
-            description=step["description"],
-            product_id=step.get("product_id"),
-            product_name=step.get("product_name"),
-            price=step.get("price")
-        )
-        db.add(db_step)
+#     for step in steps:
+#         db_step = models.RoutineStep(
+#             routine_id=routine.id,
+#             step_number=step["step_number"],
+#             description=step["description"],
+#             product_id=step.get("product_id"),
+#             product_name=step.get("product_name"),
+#             price=step.get("price")
+#         )
+#         db.add(db_step)
 
-    db.commit()
-    db.refresh(routine)
-    return routine
+#     db.commit()
+#     db.refresh(routine)
+#     return routine
 
-@app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
-def generate_routine(db: Session = Depends(get_db), budget_range: str = Form(...)):
-    plans = []
+# @app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
+# def generate_routine(db: Session = Depends(get_db), budget_range: str = Form(...)):
+#     plans = []
     
-    for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-        routine = create_routine(
-            db,
-            data.user_id,
-            plan_name,
-            data.skin_type,
-            data.concerns,
-            data.preferences,
-            data.budget_range
-        )
+#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
+#         routine = create_routine(
+#             db,
+#             data.user_id,
+#             plan_name,
+#             data.skin_type,
+#             data.concerns,
+#             data.preferences,
+#             data.budget_range
+#         )
 
-        steps_out = [
-            schemas.RoutineStepOut(
-                step_name=step.description,
-                product_name=step.product_name
-            )
-            for step in routine.steps
-        ]
+#         steps_out = [
+#             schemas.RoutineStepOut(
+#                 step_name=step.description,
+#                 product_name=step.product_name
+#             )
+#             for step in routine.steps
+#         ]
 
-        plan_out = schemas.RoutinePlanOut(
-            id=routine.id,
-            user_id=routine.user_id,
-            plan_name=routine.plan_name,
-            created_at=routine.created_at,
-            steps=steps_out
-        )
-        plans.append(plan_out)
+#         plan_out = schemas.RoutinePlanOut(
+#             id=routine.id,
+#             user_id=routine.user_id,
+#             plan_name=routine.plan_name,
+#             created_at=routine.created_at,
+#             steps=steps_out
+#         )
+#         plans.append(plan_out)
 
-    return plans
+#     return plans
 
 
 

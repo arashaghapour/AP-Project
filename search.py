@@ -1,5 +1,25 @@
 import sqlite3 as lite
 import json
+from datetime import datetime
+
+season_weights = {
+    "summer": {"sunscreen": 3, "moisturizer": 1, "serum": 1},
+    "winter": {"moisturizer": 3, "lip_balm": 2, "sunscreen": 0.5},
+    "spring": {"serum": 2, "cleanser": 1.5},
+    "autumn": {"moisturizer": 2, "cleanser": 1}
+}
+
+def get_season():
+    month = datetime.now().month
+    if month in [12, 1, 2]:
+        return 'winter'
+    elif month in [3, 4, 5]:
+        return 'spring'
+    elif month in [6, 7, 8]:
+        return 'summer'
+    else:
+        return 'autumn'
+    
 
 def search_in_database(user_in_code, searched_item):
     products_scores = {}
@@ -9,6 +29,8 @@ def search_in_database(user_in_code, searched_item):
                         'most_view': 53, 'skin_type': 90, 'user_skin_type': 43, 'user_concerns': 47,
                         'searched_skin_type': 297, 'searched_concerns': 294, 'searched_category': 292, 'budge_range': 53}
     
+    parameters_score['season'] = 77
+
     concerns_labels = {'acne': 10,'combination': 12 ,'dullness': 14}
     category = {'cleanser': 10, 'moisturizer': 12, 'serum': 20}
     skin_types = {'oily': 10, 'dry': 40, 'sensitive': 70, 'combination': 25}
@@ -30,7 +52,8 @@ def search_in_database(user_in_code, searched_item):
         parameters_score['searched_skin_type']: 'it because you have searched this skin types.',
         parameters_score['searched_concerns']: 'it because you have searched this concerns.',
         parameters_score['searched_category']: 'it because you have searched this concerns.',
-        parameters_score['budge_range']: 'it because you have budge range.'
+        parameters_score['budge_range']: 'it because you have budge range.',
+        parameters_score['season']: 'This product is more suitable for the current season.'
     }
 
     conn = lite.connect('.database.db')
@@ -148,6 +171,14 @@ def search_in_database(user_in_code, searched_item):
                 product = concerns_targeted(cursor, concern)
                 for i in product:
                     products_scores[i].append(parameters_score['close'])
+        
+        season = get_season()
+        for id, scores_list in products_scores.items():
+            product_info = product_information(cursor, id)
+            product_category = product_info[3][0]  
+            if product_category in season_weights[season]:
+                weight = season_weights[season][product_category]
+                products_scores[id].append(weight * 50)
 
         if len(list_of_products) > 1:
             for item in range(len(list_of_products) - 1):
@@ -258,3 +289,4 @@ def get_column(cursor):
 def user_budget_range(cursor, user_in_code):
     cursor.execute("select budget_range from Users where user_id = ?", (user_in_code, ))
     return cursor.fetchall()
+
