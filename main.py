@@ -94,7 +94,7 @@ def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)
     db.refresh(new_product)
     return Response(content='product created', status_code=201)
 
-@app.delete("/product/delete_product/{product_id}", tags=['Product'])
+@app.delete("/product/delete_product/{product_id}", response_model=List[schemas.ProductCreate], tags=['Product'])
 def deleting_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(models.Products).filter(models.Products.product_id == product_id).first()
     if not product:
@@ -103,7 +103,7 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
     db.commit()
     return Response(content="Product deleted successfully", status_code=200)
 
-
+@app.get("/product/")
 @app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
@@ -120,23 +120,69 @@ def get_all_products(db: Session = Depends(get_db)):
     return products
 
 
-@app.post("/shopping", response_model=schemas.PurchaseHistoryCreate, tags=['Shop'])
-def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
+@app.post('/shop/add_to_cart', tags=['Shop'])
+def add_to_cart(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     global user_in_code
-    new_product_data = {'user_id': user_in_code, 'product_id': product.product_id, 'quantity': product.quantity}
-    new_product = models.Purchase_History(**new_product_data)
-    db.add(new_product)
+    db_product = db.query(models.Products).filter(models.Products.product_id == product.product_id).first()
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    
+    if db_product.stock < product.quantity:
+        raise HTTPException(status_code=400, detail="Not enough stock available")
+    
+    cart_item = models.Cart(user_id=user_in_code, product_id=product.product_id, quantity=product.quantity)
+    db.add(cart_item)
     db.commit()
-    db.refresh(new_product)
-    browse_create = {}
-    browse_create['user_id'] = user_in_code
-    browse_create['product_id'] = product.product_id
-    browse_create['interaction_type'] = 'view'
-    new_browse = models.Browsing_History(**browse_create)
-    db.add(new_browse)
+    db.refresh(cart_item)
+    return {"message": "Product added to cart successfully :)"}
+
+
+@app.post('/shop/checkout', tags=['Shop'])
+def checkout(db: Session = Depends(get_db)):
+    global user_in_code
+    cart_items = db.query(models.Cart).filter(models.Cart.user_id == user_in_code).all()  
+    if not cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+    
+    for item in cart_items:
+        db_product = db.query(models.Products).filter(models.Products.product_id == item.product_id).first()
+        if not db_product or db_product.stock < item.quantity:
+            raise HTTPException(status_code=400, detail=f"Product {item.product_id} is out of stock or insufficient")
+        
+        db_product.stock -= item.quantity
+
+        if db_product.stock == 0:
+            db_product.Status = False
+        # status_text = 'available' if db_product.Status else 'Out of stock'
+
+        purchase = models.Purchase_History(
+            user_id=user_in_code,
+            product_id=item.product_id,
+            quantity=item.quantity
+        )
+        db.add(purchase)
+
+    db.query(models.Cart).filter(models.Cart.user_id == user_in_code).delete()
     db.commit()
-    db.refresh(new_browse)
-    return Response(content='You will be happy you choose us', status_code=201)
+    return {"message": "Checkout successful. Purchase completed."}
+
+# @app.post("/shopping", response_model=schemas.PurchaseHistoryCreate, tags=['Shop'])
+# def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
+#     global user_in_code
+#     new_product_data = {'user_id': user_in_code, 'product_id': product.product_id, 'quantity': product.quantity}
+#     new_product = models.Purchase_History(**new_product_data)
+#     db.add(new_product)
+#     db.commit()
+#     db.refresh(new_product)
+#     browse_create = {}
+#     browse_create['user_id'] = user_in_code
+#     browse_create['product_id'] = product.product_id
+#     browse_create['interaction_type'] = 'view'
+#     new_browse = models.Browsing_History(**browse_create)
+#     db.add(new_browse)
+#     db.commit()
+#     db.refresh(new_browse)
+#     return Response(content='You will be happy you choose us', status_code=201)
 
 
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])

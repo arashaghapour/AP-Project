@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, JSON, String, Enum as SqllEnum, Float, Numeric, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, JSON, String, Enum as SqllEnum, Float, Numeric, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from .database import Base
 from datetime import datetime
@@ -49,6 +49,8 @@ class Users(Base):
     quiz = relationship('Quiz_result', back_populates='user2')
     purchasing = relationship('Purchase_History', back_populates='user2')  
 
+    cart_items = relationship("Cart", back_populates="user")
+
 
 class Admins(Base):
     __tablename__ = "Admins"
@@ -69,8 +71,21 @@ class Products(Base):
     rating = Column(Float, index=True)
     image_url = Column(String, nullable=True, index=True)
     tags = Column(JSON, index=True)
-    count = Column(Integer)
+    stock = Column(Integer, default=0, nullable=False)
+    Status = Column(Boolean, default=True)
 
+    purchases = relationship("Purchase_History", back_populates="product")
+    cart_items = relationship("Cart", back_populates="product")
+
+class Cart(Base):
+    __tablename__ = "Cart"
+    id = Column(Integer, primary_key=True, index= True)
+    user_id = Column(Integer, ForeignKey("Users.user_id"))
+    product_id = Column(Integer, ForeignKey("Products.product_id"))
+    quantity = Column(Integer, nullable=False)
+
+    user = relationship("Users", back_populates="cart_items")
+    product = relationship("Products", back_populates="cart_items")
 
 class Quiz_result(Base):
     __tablename__ = "Quiz_result"
@@ -118,19 +133,20 @@ class Browsing_History(Base):
     interaction_type = Column(SqllEnum(interaction_type_allowed), nullable=False, index=True)
 
     user = relationship('Users', back_populates='browsing')
-    purchasing2 = relationship('Purchase_History', back_populates='browsing2')  
+    # purchasing2 = relationship('Purchase_History', back_populates='browsing2')  
 
 
 class Purchase_History(Base):
     __tablename__ = 'Purchase_History'
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     user_id = Column(Integer, ForeignKey('Users.user_id'), index=True)
-    product_id = Column(Integer, ForeignKey('Browsing_History.product_id'), index=True)
+    product_id = Column(Integer, ForeignKey('Products.product_id'), index=True)
     quantity = Column(Integer, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow, index=True)
 
     user2 = relationship('Users', back_populates='purchasing')
-    browsing2 = relationship('Browsing_History', back_populates='purchasing2')
+    # browsing2 = relationship('Browsing_History', back_populates='purchasing2')
+    product = relationship('Products', back_populates='purchases')
 
 
 class Contextual_Signals(Base):
