@@ -85,7 +85,7 @@ def review_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     raise HTTPException(status_code=401, detail="Invalid credentials")
     
-@app.post("/add_product", response_model=schemas.ProductCreate)
+@app.post("/add_product", response_model=schemas.ProductCreate, tags=['Product'])
 def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     product_data = product.dict()
     new_product = models.Products(**product_data)
@@ -94,7 +94,7 @@ def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)
     db.refresh(new_product)
     return Response(content='product created', status_code=201)
 
-@app.get("/all_products", response_model=List[schemas.ProductCreate])
+@app.get("/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
     browse_create = {}
@@ -110,7 +110,7 @@ def get_all_products(db: Session = Depends(get_db)):
     return products
 
 
-@app.post("/shopping", response_model=schemas.PurchaseHistoryCreate)
+@app.post("/shopping", response_model=schemas.PurchaseHistoryCreate, tags=['Shop'])
 def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     global user_in_code
     new_product_data = {'user_id': user_in_code, 'product_id': product.product_id, 'quantity': product.quantity}
@@ -129,7 +129,7 @@ def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     return Response(content='You will be happy you choose us', status_code=201)
 
 
-@app.post("/search", response_model=schemas.Product_out2)
+@app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
     search_result = search_in_database(user_in_code, search.search)
     browse_create = {}
