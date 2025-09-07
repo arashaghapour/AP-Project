@@ -7,10 +7,10 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List, Optional
 from .search import search_in_database
-from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
+from .schemas import ProductCreate, Product_out1, QuizInput
 from .models import Products
 import requests
-from .add_product_to_routin import choose_products 
+from .add_product_to_routin import add_product
 import sqlite3
 import random
 ############################
@@ -230,9 +230,7 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
     db.commit()
     for items in search_result['items']:
         submit_list.append(items)
-        count2 += 1
-        if count2 == 3:
-            break
+        
     return {'items': submit_list}
 
 @app.post("/add_admin", response_model=schemas.Admin, tags=['Admin'])
@@ -278,104 +276,13 @@ def quiz_questions():
 #     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
 
 
-# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
-# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
-#     plans = []
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
-#         plans.append(routine)
-#     return plans
-# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
-# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
-#     plans = []
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(
-#             db, 
-#             data.user_id, 
-#             plan_name, 
-#             data.skin_type, 
-#             data.concerns, 
-#             data.preferences, 
-#             data.budget_range
-#         )
-
-        
-#         steps_out = [
-#             RoutineStepOut(
-#                 step_name=step.description,   
-#                 product_name=step.product_name
-#             )
-#             for step in routine.steps
-#         ]
-
-#         plans.append(RoutinePlanOut(
-#             id=routine.id,
-#             name=routine.name,
-#             steps=steps_out
-#         ))
-
-#     return plans
 
 from . import models
 
+@app.post("/generate_routine", response_model=List[schemas.RoutineOut], tags=['Routine'])
+def generate_routine():
+    return add_product(user_in_code)
 
-# def create_routine(db: Session, user_id: int, plan_name: str,
-#                    skin_type: str, concerns: list, preferences: list, budget_range: list):
-#     # routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
-#     # db.add(routine)
-#     # db.commit()
-#     # db.refresh(routine)
-
-#     steps = choose_products(db, +skin_type, concerns, preferences, plan_name, budget_range)
-
-#     for step in steps:
-#         db_step = models.RoutineStep(
-#             routine_id=routine.id,
-#             step_number=step["step_number"],
-#             description=step["description"],
-#             product_id=step.get("product_id"),
-#             product_name=step.get("product_name"),
-#             price=step.get("price")
-#         )
-#         db.add(db_step)
-
-#     db.commit()
-#     db.refresh(routine)
-#     return routine
-
-# @app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
-# def generate_routine(db: Session = Depends(get_db), budget_range: str = Form(...)):
-#     plans = []
-    
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(
-#             db,
-#             data.user_id,
-#             plan_name,
-#             data.skin_type,
-#             data.concerns,
-#             data.preferences,
-#             data.budget_range
-#         )
-
-#         steps_out = [
-#             schemas.RoutineStepOut(
-#                 step_name=step.description,
-#                 product_name=step.product_name
-#             )
-#             for step in routine.steps
-#         ]
-
-#         plan_out = schemas.RoutinePlanOut(
-#             id=routine.id,
-#             user_id=routine.user_id,
-#             plan_name=routine.plan_name,
-#             created_at=routine.created_at,
-#             steps=steps_out
-#         )
-#         plans.append(plan_out)
-
-#     return plans
 
 
 

@@ -27,7 +27,7 @@ def search_in_database(user_in_code, searched_item):
                         'rating': 22, 'name': 283, 'brand': 281,
                         'purchase': 41,'searched': 13, 'close': 31,
                         'most_view': 53, 'skin_type': 90, 'user_skin_type': 43, 'user_concerns': 47,
-                        'searched_skin_type': 297, 'searched_concerns': 294, 'searched_category': 292, 'budge_range': 51}
+                        'searched_skin_type': 297, 'searched_concerns': 294, 'searched_category': 292, 'budget_range': 51}
     
     parameters_score['season'] = 77
 
@@ -52,7 +52,7 @@ def search_in_database(user_in_code, searched_item):
         parameters_score['searched_skin_type']: 'it because you have searched this skin types.',
         parameters_score['searched_concerns']: 'it because you have searched this concerns.',
         parameters_score['searched_category']: 'it because you have searched this category.',
-        parameters_score['budge_range']: 'it because you have budge range.',
+        parameters_score['budget_range']: 'it because you have budge range.',
         parameters_score['season']: 'This product is more suitable for the current season.'
     }
 
@@ -152,8 +152,10 @@ def search_in_database(user_in_code, searched_item):
         for id, scores_list in products_scores.items():
             products_scores[id].append(round(product_rating(cursor, id) * parameters_score['rating'], 2))
             if user_budget:
-                if user_budget[0] - 2000 < product_price(cursor, id) < user_budget[0] + 2000:
-                    products_scores[id].append(parameters_score['user_budget'])
+                user_budget = user_budget[0][0]
+                print(user_budget)
+                if user_budget - 2000 < product_price(cursor, id) < user_budget + 2000:
+                    products_scores[id].append(parameters_score['budget_range'])
                    
 
 
@@ -221,7 +223,6 @@ def search_in_database(user_in_code, searched_item):
                     break
             if len(list_of_products[-1]) != 3:
                     list_of_products[-1].append(reasons_of_parameters[parameters_score['rating']])
-        count1 = 0
         for item in list_of_products:
             if item[1] == 0:
                 continue
@@ -242,7 +243,6 @@ def search_in_database(user_in_code, searched_item):
                 'response': item[2]
             }
             output.append(item_of_product)
-            count1 += 1
         return {'items': output}
     else:
         return {'items': [{'product_id': user_in_code,

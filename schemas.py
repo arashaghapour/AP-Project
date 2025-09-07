@@ -198,20 +198,13 @@ class QuizInput(BaseModel):
     budget_range: List[float] = Field(default_factory=lambda: [0, 999], example=[100, 500])
 
 
-class RoutineStepOut(BaseModel):
+class StepOut(BaseModel):
     step_name: str
-    product_id: Optional[int] = None
-    product_name: Optional[str] = None
-    price: Optional[float] = None
-    class Config:
-        orm_mode = True
+    product_id: str  
+    product_name: str
+    instructions: str
 
-class RoutinePlanOut(BaseModel):
-    id: int
-    user_id: Optional[int]
-    plan_name: str
-    created_at: datetime
-    steps: List[RoutineStepOut]
+class RoutineOut(BaseModel):
+    Plan_name: str
+    step: List[StepOut]
 
-    class Config:
-        free_attribute = True
