@@ -99,14 +99,16 @@ class Product_out1(BaseModel):
     product_id: int
     name: str
     brand: str
-    category: List[str]
+    category: str
     skin_type: List[str]
     concerns_targeted: List[str]
     ingredients: List[str]
-    price: float
+    price: int
     rating: float
-    response: str
+    image_url: str
+    tags: List[str]
     count: int
+    response: str
 
 
 class Product_out2(BaseModel):

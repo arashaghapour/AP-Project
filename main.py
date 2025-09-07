@@ -12,6 +12,7 @@ from .models import Products
 import requests
 from .add_product_to_routin import choose_products 
 import sqlite3
+import random
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -20,12 +21,34 @@ security = HTTPBearer()
 AILAB_API_KEY = "cmea2907w0001jo041hntvzpp"
 AILAB_URL = "https://api.ailabtools.com/skin/analyze"
 user_in_code = None
+@app.post('/generate random database', tags=['fill database'])
+def add_product_to_database(db: Session = Depends(get_db)):
+    Products = []
+    for i in range(1000):
+        len_of_skintype = random.randint(1, 5)
+        len_of_concens = random.randint(1, 4)
+        product = models.Products(
+            name=f'product {i}',
+            brand=random.choice(['iran', 'turkey', 'america', 'german', 'france']), 
+            category=random.choice(['cleanser', 'serum',  'moisturizer']),            
+            skin_types= list(set([random.choice(['oily', 'dry', 'sensitive', 'combination']) for i in range(len_of_skintype)])),
+            concerns_targeted=list(set([random.choice(['acne', 'combination', 'dullness']) for i in range(len_of_concens)])),
+            ingredients = ['string'],
+            price=random.randrange(1000, 10000),
+            rating = round(random.uniform(3.6, 5), 2),
+            image_url = 'string',
+            tags = ['string'],
+            count = random.randint(10, 10000)
+        )
+        Products.append(product)
+    db.bulk_save_objects(Products)
+    db.commit()
 
 
 def read_database():
     conn = sqlite3.connect('./database.db')
     cursor = conn.cursor()
-    return cursor
+    return conn, cursor
 
 
 def find_user_id(cursor, user_name):
@@ -60,23 +83,26 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    token_data = {"sub": str(user.user_name), "role": 'normal user'} 
-    token = create_access_token(token_data)
     global user_in_code
-    cursor = read_database()
+    conn, cursor = read_database()
     user_id = find_user_id(cursor, user.user_name)
     user_in_code = user_id
+    token_data = {"sub": str(user_in_code), "role": 'normal user'} 
+    token = create_access_token(token_data)
     return {"message": "user created", "access_token": token, "token_type": "bearer"}
 
 
 @app.post("/Account/login", tags=['Account'] , response_model=schemas.Token)
 def review_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     global user_in_code
-    user_review = db.query(models.Users_for_sign_up).filter(models.Users_for_sign_up.user_id == user.user_id).first()
-    admin_review = db.query(models.Admins).filter(models.Admins.user_id == user.user_id).first()
+    
+    conn, cursor = read_database()
+    user_id = find_user_id(cursor, user.user_name)
+    user_review = db.query(models.Users_for_sign_up).filter(models.Users_for_sign_up.user_name == user.user_name).first()
+    admin_review = db.query(models.Admins).filter(models.Admins.user_name == user.user_name).first()
     if user_review and pwd_context.verify(user.password, user_review.password):
         user_in_code = user_review.user_id
-        token = create_access_token({"sub": str(user.user_id), "role": "user"})
+        token = create_access_token({"sub": str(user_in_code), "role": "user"})
         return {"access_token": token, "token_type": "bearer"}
 
     if admin_review and pwd_context.verify(user.password, admin_review.password):
@@ -351,11 +377,13 @@ async def submitting_quiz(
         "q10": q10,
     }
 
-
+    conn, cursor = read_database()
+    cursor.execute('delete from Users where user_id = ?', (user_in_code, ))
+    conn.commit()
     quiz_result = utils.analyze_quiz(answers)
     complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
-                         'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
-    print(complete_database)
+                         'preferences': quiz_result['preferences'], 'device_type': 'mobile', 'budget_range': budget}
+    
     user_skin_property = models.Users(**complete_database)
     db.add(user_skin_property)
     db.commit()
