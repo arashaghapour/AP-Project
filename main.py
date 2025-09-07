@@ -12,7 +12,7 @@ from .models import Products
 import requests
 from .add_product_to_routin import choose_products 
 import sqlite3
-
+############################
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -20,7 +20,7 @@ security = HTTPBearer()
 AILAB_API_KEY = "cmea2907w0001jo041hntvzpp"
 AILAB_URL = "https://api.ailabtools.com/skin/analyze"
 user_in_code = None
-
+############################
 
 def read_database():
     conn = sqlite3.connect('./database.db')
@@ -85,7 +85,7 @@ def review_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     raise HTTPException(status_code=401, detail="Invalid credentials")
     
-@app.post("/add_product", response_model=schemas.ProductCreate, tags=['Product'])
+@app.post("/product/add_product", response_model=schemas.ProductCreate, tags=['Product'])
 def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     product_data = product.dict()
     new_product = models.Products(**product_data)
@@ -94,7 +94,7 @@ def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)
     db.refresh(new_product)
     return Response(content='product created', status_code=201)
 
-@app.delete("/delete_product/{product_id}", tags=['Product'])
+@app.delete("/product/delete_product/{product_id}", tags=['Product'])
 def deleting_product(product_id: int, db: Session = Depends(get_db)):
     product = db.query(models.Products).filter(models.Products.product_id == product_id).first()
     if not product:
@@ -104,7 +104,7 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
     return Response(content="Product deleted successfully", status_code=200)
 
 
-@app.get("/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
+@app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
     browse_create = {}
