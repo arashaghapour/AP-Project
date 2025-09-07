@@ -94,6 +94,16 @@ def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)
     db.refresh(new_product)
     return Response(content='product created', status_code=201)
 
+@app.delete("/delete_product/{product_id}", tags=['Product'])
+def deleting_product(product_id: int, db: Session = Depends(get_db)):
+    product = db.query(models.Products).filter(models.Products.product_id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    db.delete(product)
+    db.commit()
+    return Response(content="Product deleted successfully", status_code=200)
+
+
 @app.get("/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
