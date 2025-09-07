@@ -103,7 +103,7 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
     db.commit()
     return Response(content="Product deleted successfully", status_code=200)
 
-@app.get("/product/")
+
 @app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
