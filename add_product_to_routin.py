@@ -42,7 +42,7 @@ def add_product(user_in_code):
         routine['step'] = step1
         step1 = []
         routine_steps.append(routine)
-    print(routine_steps)
+    
     return routine_steps
 
 

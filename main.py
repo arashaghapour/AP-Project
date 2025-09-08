@@ -153,7 +153,7 @@ def add_to_cart(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if db_product.stock < product.quantity:
+    if db_product.count < product.quantity:
         raise HTTPException(status_code=400, detail="Not enough stock available")
     
     cart_item = models.Cart(user_id=user_in_code, product_id=product.product_id, quantity=product.quantity)
@@ -172,12 +172,12 @@ def checkout(db: Session = Depends(get_db)):
     
     for item in cart_items:
         db_product = db.query(models.Products).filter(models.Products.product_id == item.product_id).first()
-        if not db_product or db_product.stock < item.quantity:
+        if not db_product or db_product.count < item.quantity:
             raise HTTPException(status_code=400, detail=f"Product {item.product_id} is out of stock or insufficient")
         
-        db_product.stock -= item.quantity
+        db_product.count -= item.quantity
 
-        if db_product.stock == 0:
+        if db_product.count == 0:
             db_product.Status = False
         # status_text = 'available' if db_product.Status else 'Out of stock'
 

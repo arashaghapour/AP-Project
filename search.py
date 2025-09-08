@@ -149,11 +149,11 @@ def search_in_database(user_in_code, searched_item):
             products_scores[i].append(parameters_score['most_view'])
             break
         user_budget = user_budget_range(cursor, user_in_code)
+        if user_budget:
+            user_budget = user_budget[0][0]
         for id, scores_list in products_scores.items():
             products_scores[id].append(round(product_rating(cursor, id) * parameters_score['rating'], 2))
-            if user_budget:
-                user_budget = user_budget[0][0]
-                print(user_budget)
+            if user_budget:              
                 if user_budget - 2000 < product_price(cursor, id) < user_budget + 2000:
                     products_scores[id].append(parameters_score['budget_range'])
                    
