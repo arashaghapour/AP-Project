@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skin Shop - Routine Products</title>
+    <link rel="stylesheet" href="../static/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="../static/images/logo.png" />
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+    <header class="site-header">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="index.html">Skin Shop</a>
+        </div>
+        <nav class="navbar">
+          <ul>
+            <li><a href="/shop">Shop</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="/quiz">Quiz</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+        <div class="search-bar">
+          <input type="text" placeholder="Search products..." />
+          <button type="submit">Search</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="products-section">
+      <div class="container">
+        <h2>Recommended Routine Plans</h2>
+        <div id="products" class="product-grid"></div>
+      </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="site-footer">
+      <div class="container footer-container">
+        <div class="footer-column">
+          <h4>Products</h4>
+          <ul>
+            <li><a href="#">Luxury Creams</a></li>
+            <li><a href="#">Face Wash</a></li>
+            <li><a href="#">Sunscreens</a></li>
+            <li><a href="#">Hair Care</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Further Info</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Customer Care</h4>
+          <ul>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Return Policy</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2025 Skin Shop | All rights reserved.</p>
+        <div class="social-links">
+          <a href="https://www.facebook.com"><i class="fab fa-facebook"></i></a>
+          <a href="https://twitter.com"><i class="fab fa-x-twitter"></i></a>
+          <a href="https://www.instagram.com"
+            ><i class="fab fa-instagram"></i
+          ></a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      async function loadRoutine() {
+        const res = await fetch("/generate_routine", {
+          method: "POST",
+        });
+        const plans = await res.json();
+        renderRoutine(plans);
+      }
+
+      function renderRoutine(plans) {
+        const container = document.getElementById("products");
+        container.innerHTML = "";
+
+        plans.forEach((plan) => {
+          const planDiv = document.createElement("div");
+          planDiv.className = "routine_plan";
+          planDiv.innerHTML = `<h3>${plan.Plan_name}</h3>`;
+          container.appendChild(planDiv);
+
+          plan.step.forEach((step) => {
+            const names = step.product_name
+              .split(", ")
+              .map((p) => p.trim())
+              .filter((p) => p.length > 0);
+
+            names.forEach((prodName) => {
+              const div = document.createElement("div");
+              div.className = "product";
+              div.innerHTML = `
+                <img src="../static/images/shop_01.jpg" alt="Product Image">
+                <h4>${prodName}</h4>
+                <p>Step: ${step.step_name}</p>
+                <p>${step.instructions}</p>
+                <button onclick="addToCart('${prodName}')">Add to Cart</button>
+              `;
+              container.appendChild(div);
+            });
+          });
+        });
+      }
+
+      async function addToCart(productName) {
+        alert("Added " + productName + " to cart!");
+      }
+
+      loadRoutine();
+    </script>
+  </body>
+</html>

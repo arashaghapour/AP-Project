@@ -81,9 +81,9 @@ def merge_results(selfie_result: dict, quiz_result: dict) -> dict:
         "preferences": preferences
     }
 
-@app.get('/signup', response_class=HTMLResponse)
-def sign_up_page(request: Request):
-    return templates.TemplateResponse('Sign-up.html', {'request': request})
+@app.get("/signup", response_class=HTMLResponse)
+def signup(request: Request):
+    return templates.TemplateResponse("Sign-up.html", {"request": request})
 @app.post("/Account/sign_up", tags=['Account'])
 def create_user(db: Session = Depends(get_db), username: str = Form(...), password: str = Form(...)):
     user_data = {'user_name':username, 'password':password}
@@ -150,15 +150,15 @@ def shop(request: Request):
 @app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
-    browse_create = {}
-    for i in products:
+    # browse_create = {}
+    # for i in products:
 
-        browse_create['user_id'] = user_in_code
-        browse_create['product_id'] = i.product_id
-        browse_create['interaction_type'] = 'view'
-        new_browse = models.Browsing_History(**browse_create)
-        db.add(new_browse)
-    db.commit()
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = i.product_id
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+    # db.commit()
     # db.refresh(new_browse)
     return products
 
@@ -294,7 +294,11 @@ def quiz_questions():
 
 from . import models
 
-@app.post("/generate_routine", response_model=List[schemas.RoutineOut], tags=['Routine'])
+@app.get("/routine", response_class=HTMLResponse)
+def routine(request: Request):
+    return templates.TemplateResponse("routine.html", {"request": request})
+
+@app.post("/generate_routine", tags=['Routine'])
 def generate_routine():
     return add_product(user_in_code)
 
@@ -314,7 +318,9 @@ def generate_routine():
 #         return response.json()
 #     else:
 #         return {'error': response.text}
-
+@app.get('/quiz', response_class=HTMLResponse)
+def quiz(request: Request):
+    return templates.TemplateResponse('Quiz.html', {'request': request})
 @app.post('/quiz/submit', tags=['Quiz'])
 async def submitting_quiz(
                   q1: str = Form(...),
@@ -327,7 +333,7 @@ async def submitting_quiz(
                   q8: str = Form(...),
                   q9: str = Form(...),
                   q10: str = Form(...),
-                  budget: int = Form, db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+                  budget: int = Form(...), db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
     selfie_result = {}
     if file is not None:
         if not file.content_type.startswith("image/"):

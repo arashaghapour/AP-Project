@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Routine Quiz</title>
+    <link rel="stylesheet" href="../static/Quiz.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Routine Quiz - Get your skin type! 🧴</h1>
+
+      <form id="quizForm">
+        <div class="question">
+          <p>1. How does your skin feel a few hours after washing it?</p>
+          <div class="options">
+            <label><input type="radio" name="q1" value="dry" /> dry </label>
+            <label
+              ><input type="radio" name="q1" value="smooth" /> smooth
+            </label>
+            <label><input type="radio" name="q1" value="oily" /> oily </label>
+            <label
+              ><input type="radio" name="q1" value="combination" /> combination
+            </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>2. Do you experience breakouts frequently?</p>
+          <div class="options">
+            <label><input type="radio" name="q2" value="yes" /> yes </label>
+            <label
+              ><input type="radio" name="q2" value="sometimes" /> sometimes
+            </label>
+            <label
+              ><input type="radio" name="q2" value="rarely" /> rarely
+            </label>
+            <label
+              ><input type="radio" name="q2" value="T-zone only" /> T-zone only
+            </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>3. How sensitive is your skin to new products?</p>
+          <div class="options">
+            <label
+              ><input type="radio" name="q3" value="very_sensitive" /> very
+              sensitive
+            </label>
+            <label
+              ><input type="radio" name="q3" value="mildly" /> mildly
+            </label>
+            <label
+              ><input type="radio" name="q3" value="not_sensitive" /> not
+              sensitive
+            </label>
+            <label
+              ><input type="radio" name="q3" value="not_sure" /> not sure
+            </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>4. Do you currently have acne, pimples, or breakouts?</p>
+          <div class="options">
+            <label><input type="radio" name="q4" value="yes" /> yes </label>
+            <label><input type="radio" name="q4" value="no" /> no </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>5. Are you concerned about wrinkles?</p>
+          <div class="options">
+            <label><input type="radio" name="q5" value="yes" /> yes </label>
+            <label><input type="radio" name="q5" value="no" /> no </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>6. Do you notice dark spots or uneven tone?</p>
+          <div class="options">
+            <label><input type="radio" name="q6" value="yes" /> yes </label>
+            <label><input type="radio" name="q6" value="no" /> no </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>7. How much time can you spend on skincare daily?</p>
+          <div class="options">
+            <label
+              ><input type="radio" name="q7" value="under_5min" /> under 5min
+            </label>
+            <label
+              ><input type="radio" name="q7" value="5-10min" /> 5-10 min
+            </label>
+            <label
+              ><input type="radio" name="q7" value="15min_plus" /> 15min plus
+            </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>8. How many steps do you prefer in your routine?</p>
+          <div class="options">
+            <label
+              ><input type="radio" name="q8" value="minimal" /> minimal
+            </label>
+            <label
+              ><input type="radio" name="q8" value="moderate" /> moderate
+            </label>
+            <label><input type="radio" name="q8" value="full" /> full </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>9. Do you prefer natural or clinical skincare products?</p>
+          <div class="options">
+            <label
+              ><input type="radio" name="q9" value="natural" /> natural
+            </label>
+            <label
+              ><input type="radio" name="q9" value="clinical" /> clinical
+            </label>
+          </div>
+        </div>
+
+        <div class="question">
+          <p>10. Do you wear makeup regularly?</p>
+          <div class="options">
+            <label
+              ><input type="radio" name="q10" value="daily" /> daily
+            </label>
+            <label
+              ><input type="radio" name="q10" value="weekly" /> weekly
+            </label>
+            <label
+              ><input type="radio" name="q10" value="rarely" /> rarely
+            </label>
+            <label
+              ><input type="radio" name="q10" value="never" /> never
+            </label>
+          </div>
+        </div>
+        <div class="question">
+          <p>11. What is your skincare budget range (monthly)?</p>
+          <div class="options">
+            <label
+              ><input type="radio" name="budget" value="2000" /> under 2000
+            </label>
+            <label
+              ><input type="radio" name="budget" value="5000" /> 2000 - 5000
+            </label>
+            <label
+              ><input type="radio" name="budget" value="6000" /> 5000 - $7500
+            </label>
+            <label
+              ><input type="radio" name="budget" value="1000" /> 7500+
+            </label>
+          </div>
+        </div>
+        <button type="button" onclick="submitQuiz()">View results! 🧮</button>
+      </form>
+
+      <div id="result"></div>
+      <div class="next_page">
+        <a href="/routine" class="next_btn">➡ Go to Routine Page</a>
+      </div>
+    </div>
+
+    <script>
+      async function submitQuiz() {
+        const form = document.getElementById("quizForm");
+        const formData = new FormData(form);
+
+        try {
+          const res = await fetch("/quiz/submit", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!res.ok) {
+            const err = await res.text();
+            document.getElementById("result").innerText = "❌ Error: " + err;
+            return;
+          }
+
+          const data = await res.json();
+          document.getElementById("result").innerText =
+            "✅ Your result: " + JSON.stringify(data);
+        } catch (err) {
+          document.getElementById("result").innerText =
+            "⚠️ Request failed: " + err.message;
+        }
+      }
+    </script>
+  </body>
+</html>

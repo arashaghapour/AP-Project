@@ -288,7 +288,15 @@ form .sign-up a:hover {
   color: #555;
   transition: 0.3s;
 }
-
+.routine_plan h3 {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2575fc;
+  border-bottom: 2px solid #2575fc;
+  padding-bottom: 10px;
+}
 .social-links a:hover {
   color: #0dcbbc;
 }
@@ -423,7 +431,7 @@ form .sign-up a:hover {
   background: #fff;
   padding: 25px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -475,7 +483,7 @@ form .sign-up a:hover {
   background: #fff;
   padding: 25px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
 }
 
