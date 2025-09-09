@@ -12,6 +12,8 @@ from .models import Products
 import requests
 from .add_product_to_routin import choose_products 
 import sqlite3
+from .redis_client import redis_client
+
 ############################
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -106,18 +108,27 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
 
 @app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
+    cache_key = "all_products"
+    cached_products = redis_client.get(cache_key)
+    if cached_products:
+        return eval(cached_products)
+    
     products = db.query(models.Products).all()
-    browse_create = {}
-    for i in products:
-
-        browse_create['user_id'] = user_in_code
-        browse_create['product_id'] = i.product_id
-        browse_create['interaction_type'] = 'view'
-        new_browse = models.Browsing_History(**browse_create)
-        db.add(new_browse)
-    db.commit()
-    # db.refresh(new_browse)
+    redis_client.set(cache_key, str([p.__dict__ for p in products]), ex=600)  # کش ۱۰ دقیقه‌ای
     return products
+
+    # products = db.query(models.Products).all()
+    # browse_create = {}
+    # for i in products:
+
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = i.product_id
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+    # db.commit()
+    # # db.refresh(new_browse)
+    # return products
 
 
 @app.post('/shop/add_to_cart', tags=['Shop'])
@@ -166,48 +177,57 @@ def checkout(db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Checkout successful. Purchase completed."}
 
-# @app.post("/shopping", response_model=schemas.PurchaseHistoryCreate, tags=['Shop'])
-# def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
-#     global user_in_code
-#     new_product_data = {'user_id': user_in_code, 'product_id': product.product_id, 'quantity': product.quantity}
-#     new_product = models.Purchase_History(**new_product_data)
-#     db.add(new_product)
-#     db.commit()
-#     db.refresh(new_product)
-#     browse_create = {}
-#     browse_create['user_id'] = user_in_code
-#     browse_create['product_id'] = product.product_id
-#     browse_create['interaction_type'] = 'view'
-#     new_browse = models.Browsing_History(**browse_create)
-#     db.add(new_browse)
-#     db.commit()
-#     db.refresh(new_browse)
-#     return Response(content='You will be happy you choose us', status_code=201)
-
 
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
+    cache_key = f"search:{search.search}"
+
+    cached_result = redis_client.get(cache_key)
+    if cached_result:
+        return {"items": eval(cached_result)}
+
+
+
     search_result = search_in_database(user_in_code, search.search)
     browse_create = {}
     count1 = 0
     count2 = 0
     submit_list = []
-    for items in search_result['items']:
+    # for items in search_result['items']:
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = items['product_id']
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+    #     count1 += 1
+    #     if count1 == 3:
+    #         break
+
+    for idx, items in enumerate(search_result['items']):
         browse_create['user_id'] = user_in_code
         browse_create['product_id'] = items['product_id']
         browse_create['interaction_type'] = 'view'
         new_browse = models.Browsing_History(**browse_create)
         db.add(new_browse)
-        count1 += 1
-        if count1 == 3:
+        if idx == 2:  
             break
+
     db.commit()
-    for items in search_result['items']:
-        submit_list.append(items)
-        count2 += 1
-        if count2 == 3:
-            break
+
+    submit_list = search_result['items'][:3]
+
+    redis_client.set(cache_key, str(submit_list), ex=300)
+
     return {'items': submit_list}
+
+    # for items in search_result['items']:
+    #     submit_list.append(items)
+    #     count2 += 1
+    #     if count2 == 3:
+    #         break
+    # return {'items': submit_list}
+
+
 
 @app.post("/add_admin", response_model=schemas.Admin, tags=['Admin'])
 def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
