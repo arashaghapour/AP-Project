@@ -7,12 +7,15 @@ from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
 from typing import List, Optional
 from .search import search_in_database
-from .schemas import ProductCreate, Product_out1, QuizInput, RoutinePlanOut
+from .schemas import ProductCreate, Product_out1, QuizInput
 from .models import Products
 import requests
-from .add_product_to_routin import choose_products 
+from .add_product_to_routin import add_product
 import sqlite3
+
 from .redis_client import redis_client
+import random
+
 
 ############################
 Base.metadata.create_all(bind=engine)
@@ -22,12 +25,34 @@ security = HTTPBearer()
 AILAB_API_KEY = "cmea2907w0001jo041hntvzpp"
 AILAB_URL = "https://api.ailabtools.com/skin/analyze"
 user_in_code = None
+@app.post('/generate random database', tags=['fill database'])
+def add_product_to_database(db: Session = Depends(get_db)):
+    Products = []
+    for i in range(1000):
+        len_of_skintype = random.randint(1, 5)
+        len_of_concens = random.randint(1, 4)
+        product = models.Products(
+            name=f'product {i}',
+            brand=random.choice(['iran', 'turkey', 'america', 'german', 'france']), 
+            category=random.choice(['cleanser', 'serum',  'moisturizer']),            
+            skin_types= list(set([random.choice(['oily', 'dry', 'sensitive', 'combination']) for i in range(len_of_skintype)])),
+            concerns_targeted=list(set([random.choice(['acne', 'combination', 'dullness']) for i in range(len_of_concens)])),
+            ingredients = ['string'],
+            price=random.randrange(1000, 10000),
+            rating = round(random.uniform(3.6, 5), 2),
+            image_url = 'string',
+            tags = ['string'],
+            count = random.randint(10, 10000)
+        )
+        Products.append(product)
+    db.bulk_save_objects(Products)
+    db.commit()
 ############################
 
 def read_database():
     conn = sqlite3.connect('./database.db')
     cursor = conn.cursor()
-    return cursor
+    return conn, cursor
 
 
 def find_user_id(cursor, user_name):
@@ -62,23 +87,26 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    token_data = {"sub": str(user.user_name), "role": 'normal user'} 
-    token = create_access_token(token_data)
     global user_in_code
-    cursor = read_database()
+    conn, cursor = read_database()
     user_id = find_user_id(cursor, user.user_name)
     user_in_code = user_id
+    token_data = {"sub": str(user_in_code), "role": 'normal user'} 
+    token = create_access_token(token_data)
     return {"message": "user created", "access_token": token, "token_type": "bearer"}
 
 
 @app.post("/Account/login", tags=['Account'] , response_model=schemas.Token)
 def review_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     global user_in_code
-    user_review = db.query(models.Users_for_sign_up).filter(models.Users_for_sign_up.user_id == user.user_id).first()
-    admin_review = db.query(models.Admins).filter(models.Admins.user_id == user.user_id).first()
+    
+    conn, cursor = read_database()
+    user_id = find_user_id(cursor, user.user_name)
+    user_review = db.query(models.Users_for_sign_up).filter(models.Users_for_sign_up.user_name == user.user_name).first()
+    admin_review = db.query(models.Admins).filter(models.Admins.user_name == user.user_name).first()
     if user_review and pwd_context.verify(user.password, user_review.password):
         user_in_code = user_review.user_id
-        token = create_access_token({"sub": str(user.user_id), "role": "user"})
+        token = create_access_token({"sub": str(user_in_code), "role": "user"})
         return {"access_token": token, "token_type": "bearer"}
 
     if admin_review and pwd_context.verify(user.password, admin_review.password):
@@ -138,7 +166,7 @@ def add_to_cart(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    if db_product.stock < product.quantity:
+    if db_product.count < product.quantity:
         raise HTTPException(status_code=400, detail="Not enough stock available")
     
     cart_item = models.Cart(user_id=user_in_code, product_id=product.product_id, quantity=product.quantity)
@@ -157,12 +185,12 @@ def checkout(db: Session = Depends(get_db)):
     
     for item in cart_items:
         db_product = db.query(models.Products).filter(models.Products.product_id == item.product_id).first()
-        if not db_product or db_product.stock < item.quantity:
+        if not db_product or db_product.count < item.quantity:
             raise HTTPException(status_code=400, detail=f"Product {item.product_id} is out of stock or insufficient")
         
-        db_product.stock -= item.quantity
+        db_product.count -= item.quantity
 
-        if db_product.stock == 0:
+        if db_product.count == 0:
             db_product.Status = False
         # status_text = 'available' if db_product.Status else 'Out of stock'
 
@@ -213,6 +241,7 @@ def search_input(search: schemas.Search, db: Session = Depends(get_db)):
             break
 
     db.commit()
+
 
     submit_list = search_result['items'][:3]
 
@@ -272,104 +301,13 @@ def quiz_questions():
 #     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
 
 
-# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
-# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
-#     plans = []
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(db, data.user_id, plan_name, data.skin_type, data.concerns, data.preferences, data.budget_range)
-#         plans.append(routine)
-#     return plans
-# @app.post("/generate_routine", response_model=list[RoutinePlanOut], tags=['Routine'])
-# def generate_routine(data: QuizInput, db: Session = Depends(get_db)):
-#     plans = []
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(
-#             db, 
-#             data.user_id, 
-#             plan_name, 
-#             data.skin_type, 
-#             data.concerns, 
-#             data.preferences, 
-#             data.budget_range
-#         )
-
-        
-#         steps_out = [
-#             RoutineStepOut(
-#                 step_name=step.description,   
-#                 product_name=step.product_name
-#             )
-#             for step in routine.steps
-#         ]
-
-#         plans.append(RoutinePlanOut(
-#             id=routine.id,
-#             name=routine.name,
-#             steps=steps_out
-#         ))
-
-#     return plans
 
 from . import models
 
+@app.post("/generate_routine", response_model=List[schemas.RoutineOut], tags=['Routine'])
+def generate_routine():
+    return add_product(user_in_code)
 
-# def create_routine(db: Session, user_id: int, plan_name: str,
-#                    skin_type: str, concerns: list, preferences: list, budget_range: list):
-#     # routine = models.RoutinePlan(user_id=user_id, plan_name=plan_name)
-#     # db.add(routine)
-#     # db.commit()
-#     # db.refresh(routine)
-
-#     steps = choose_products(db, +skin_type, concerns, preferences, plan_name, budget_range)
-
-#     for step in steps:
-#         db_step = models.RoutineStep(
-#             routine_id=routine.id,
-#             step_number=step["step_number"],
-#             description=step["description"],
-#             product_id=step.get("product_id"),
-#             product_name=step.get("product_name"),
-#             price=step.get("price")
-#         )
-#         db.add(db_step)
-
-#     db.commit()
-#     db.refresh(routine)
-#     return routine
-
-# @app.post("/generate_routine", response_model=List[schemas.RoutinePlanOut], tags=['Routine'])
-# def generate_routine(db: Session = Depends(get_db), budget_range: str = Form(...)):
-#     plans = []
-    
-#     for plan_name in ["Full Plan", "Hydration Plan", "Minimalist Plan"]:
-#         routine = create_routine(
-#             db,
-#             data.user_id,
-#             plan_name,
-#             data.skin_type,
-#             data.concerns,
-#             data.preferences,
-#             data.budget_range
-#         )
-
-#         steps_out = [
-#             schemas.RoutineStepOut(
-#                 step_name=step.description,
-#                 product_name=step.product_name
-#             )
-#             for step in routine.steps
-#         ]
-
-#         plan_out = schemas.RoutinePlanOut(
-#             id=routine.id,
-#             user_id=routine.user_id,
-#             plan_name=routine.plan_name,
-#             created_at=routine.created_at,
-#             steps=steps_out
-#         )
-#         plans.append(plan_out)
-
-#     return plans
 
 
 
@@ -428,7 +366,7 @@ async def submitting_quiz(
     }
 
 
-    # quiz_result = utils.analyze_quiz(answers)
+    quiz_result = utils.analyze_quiz(answers)
     # complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
     #                      'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
     # print(complete_database)
@@ -445,15 +383,13 @@ async def submitting_quiz(
     else:
         final_result_data = quiz_result
         
+    conn, cursor = read_database()
+    cursor.execute('delete from Users where user_id = ?', (user_in_code, ))
+    conn.commit()
+    
 
-    quiz_result = utils.analyze_quiz(answers)
-    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': final_result_data['skin_type'], 'concerns': final_result_data['concerns'],
-                         'preferences': final_result_data['preferences'], 'device_type': 'mobile'}
-    # print(complete_database)
-    user_skin_property = models.Users(**complete_database)
-    db.add(user_skin_property)
-    db.commit()
-    db.refresh(user_skin_property)
+    
+
     
     # final = models.FinalResult(user_id=user_in_code,
     #                            selfie_result=selfie_result,
@@ -467,6 +403,12 @@ async def submitting_quiz(
     db.add(final)
     db.commit()
     db.refresh(final)
+    complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': final_result_data['skin_type'], 'concerns': final_result_data['concerns'],
+                         'preferences': final_result_data['preferences'], 'device_type': 'mobile', 'budget_range': budget}
+    user_skin_property = models.Users(**complete_database)
+    db.add(user_skin_property)
+    db.commit()
+    db.refresh(user_skin_property)
     return {
         "final_result_id": final.id,
         "final_result": final_result_data,
