@@ -1,5 +1,7 @@
 liberaries
 *.pyc
 .idea/
-*.db
+database.db
 test.py
+static/images
+__pycache__

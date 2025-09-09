@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skin Shop - Products Page</title>
+    <link rel="stylesheet" href="../static/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link rel="icon" type="image/png" href="../static/images/logo.png" />
+  </head>
+  <body>
+    <!-- ===== HEADER ===== -->
+    <header class="site-header">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="index.html">Skin Shop</a>
+        </div>
+        <nav class="navbar">
+          <ul>
+            <li><a href="index.html" class="active">Shop</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="Quiz.html">Quiz</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+        <div class="search-bar">
+          <input type="text" placeholder="Search products..." />
+          <button type="submit">Search</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="products-section">
+      <div class="container">
+        <div id="products" class="product-grid"></div>
+        <div style="margin-top: 20px; text-align: center">
+          <button onclick="checkout()">✅ Checkout</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="site-footer">
+      <div class="container footer-container">
+        <div class="footer-column">
+          <h4>Products</h4>
+          <ul>
+            <li><a href="#">Luxury Creams</a></li>
+            <li><a href="#">Face Wash</a></li>
+            <li><a href="#">Sunscreens</a></li>
+            <li><a href="#">Hair Care</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Further Info</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Customer Care</h4>
+          <ul>
+            <li><a href="#">FAQs</a></li>
+            <li><a href="#">Return Policy</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2025 Skin Shop | All rights reserved.</p>
+        <div class="social-links">
+          <a href="https://www.facebook.com"><i class="fab fa-facebook"></i></a>
+          <a href="https://twitter.com"><i class="fab fa-x-twitter"></i></a>
+          <a href="https://www.instagram.com"
+            ><i class="fab fa-instagram"></i
+          ></a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      async function loadProducts() {
+        const res = await fetch("/product/all_products");
+        const products = await res.json();
+        renderProducts(products);
+      }
+
+      function renderProducts(products) {
+        const container = document.getElementById("products");
+        container.innerHTML = "";
+
+        products.forEach((prod) => {
+          const div = document.createElement("div");
+          div.className = "product";
+          div.innerHTML = `
+        <img src="../static/images/shop_01.jpg" alt="Product Image">
+        <h3>${prod.name}</h3>
+        <p>${prod.brand || "No description"}</p>
+        <p>${prod.category || "No description"}</p>
+        <p>${prod.skin_types || "No description"}</p>
+        <p>${prod.rating || "No description"}</p>
+        <p class="price">$${prod.price}</p>
+        <button onclick="showDetails(${prod.product_id})">Details</button>
+        <button onclick="addToCart(${prod.product_id})">Add to Cart</button>
+      `;
+          container.appendChild(div);
+        });
+      }
+      function rendersearchedProducts(products) {
+        const container = document.getElementById("products");
+        container.innerHTML = "";
+
+        products.forEach((prod) => {
+          const div = document.createElement("div");
+          div.className = "product";
+          div.innerHTML = `
+        <img src="../static/images/shop_01.jpg" alt="Product Image">
+        <h3>${prod.name}</h3>
+        <p>${prod.brand || "No description"}</p>
+        <p>${prod.category || "No description"}</p>
+        <p>${prod.skin_types || "No description"}</p>
+        <p>${prod.rating || "No description"}</p>
+        <p>${prod.response || "No description"}</p>
+        <p class="price">$${prod.price}</p>
+        <button onclick="showDetails(${prod.product_id})">Details</button>
+        <button onclick="addToCart(${prod.product_id})">Add to Cart</button>
+      `;
+          container.appendChild(div);
+        });
+      }
+
+      async function searchProducts() {
+        const query = document.querySelector(".search-bar input").value;
+        if (!query) {
+          alert("Please enter something to search!");
+          return;
+        }
+
+        const res = await fetch("/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ search: query }),
+        });
+
+        const data = await res.json();
+        rendersearchedProducts(data.items);
+      }
+
+      async function addToCart(productId) {
+        const body = { product_id: productId, quantity: 1 };
+
+        const res = await fetch("/shop/add_to_cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+        alert(data.message || "Added to cart!");
+      }
+
+      async function checkout() {
+        const res = await fetch("/shop/checkout", {
+          method: "POST",
+        });
+        const data = await res.json();
+        alert(data.message || "Checkout done!");
+      }
+
+      function showDetails(id) {
+        alert("Details of product ID: " + id);
+      }
+
+      loadProducts();
+
+      document
+        .querySelector(".search-bar button")
+        .addEventListener("click", searchProducts);
+    </script>
+  </body>
+</html>
