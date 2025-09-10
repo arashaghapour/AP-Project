@@ -13,6 +13,7 @@ import requests
 from .add_product_to_routin import add_product
 import sqlite3
 import random
+from .redis_client import redis_client
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -152,6 +153,18 @@ def shop(request: Request):
     return templates.TemplateResponse("shop.html", {"request": request})
 @app.get("/product/all_products", tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
+
+    # cache_key = 'all_products'
+    # cached_products = redis_client.get(cache_key)
+    # if cached_products:
+    #     return json.loads(cached_products)
+    
+    # products = db.query(models.Products).all()
+    # result = [schemas.ProductCreate.from_orm(p).dict() for p in products]
+
+    # redis_client.set(cache_key, json.dumps(result), ex=600)
+    # return result
+
     products = db.query(models.Products).all()
     return products
 
@@ -200,6 +213,32 @@ def checkout(purchases: List[schemas.purchases_json] = Body(...), db: Session = 
     
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
+
+    # cached_result = redis_client.get(cache_key)
+    # if cached_result:
+    #     return {'items': json.loads(cached_result)}
+    
+
+    # search_result = search_in_database(user_in_code, search.search)
+    # browse_create = {}
+    # submit_list = search_result['items'][:3]
+    
+    # for items in submit_list:
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = items['product_id']
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+
+    # db.commit()
+    
+    # result = [schemas.ProductCreate(**item).dict() for item in submit_list]
+
+    # redis_client.set(cache_key, json.dumps(result), ex=300)
+
+    # return {'items': result}
+
+
     search_result = search_in_database(user_in_code, search.search)
     browse_create = {}
     count1 = 0
