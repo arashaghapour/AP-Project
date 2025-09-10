@@ -13,6 +13,8 @@ import requests
 from .add_product_to_routin import add_product
 import sqlite3
 import random
+from .redis_client import redis_client
+import json
 ############################
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -132,18 +134,31 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
 
 @app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
+    cache_key = 'all_products'
+    cached_products = redis_client.get(cache_key)
+    if cached_products:
+        return json.loads(cached_products)
+    
     products = db.query(models.Products).all()
-    browse_create = {}
-    for i in products:
+    result = [schemas.ProductCreate.from_orm(p).dict() for p in products]
 
-        browse_create['user_id'] = user_in_code
-        browse_create['product_id'] = i.product_id
-        browse_create['interaction_type'] = 'view'
-        new_browse = models.Browsing_History(**browse_create)
-        db.add(new_browse)
-    db.commit()
-    # db.refresh(new_browse)
-    return products
+    redis_client.set(cache_key, json.dumps(result), ex=600)
+    return result
+    
+    
+    
+    # products = db.query(models.Products).all()
+    # browse_create = {}
+    # for i in products:
+
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = i.product_id
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+    # db.commit()
+    # # db.refresh(new_browse)
+    # return products
 
 
 @app.post('/shop/add_to_cart', tags=['Shop'])
@@ -213,25 +228,60 @@ def checkout(db: Session = Depends(get_db)):
 
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
+    cache_key = f'search:{search.search}'
+    cached_result = redis_client.get(cache_key)
+    if cached_result:
+        return {'items': json.loads(cached_result)}
+    
+
     search_result = search_in_database(user_in_code, search.search)
     browse_create = {}
-    count1 = 0
-    count2 = 0
-    submit_list = []
-    for items in search_result['items']:
+    # count1 = 0
+    # count2 = 0
+    # submit_list = []
+
+    # for items in search_result['items']:
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = items['product_id']
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+    #     count1 += 1
+    #     if count1 == 3:
+    #         break
+
+    # for idx, items in enumerate(search_result['items']):
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = items['product_id']
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+    #     if idx == 2:
+    #         break
+    
+    # db.commit()
+
+    submit_list = search_result['items'][:3]
+    
+    for items in submit_list:
         browse_create['user_id'] = user_in_code
         browse_create['product_id'] = items['product_id']
         browse_create['interaction_type'] = 'view'
         new_browse = models.Browsing_History(**browse_create)
         db.add(new_browse)
-        count1 += 1
-        if count1 == 3:
-            break
+
     db.commit()
-    for items in search_result['items']:
-        submit_list.append(items)
+    
+    result = [schemas.ProductCreate(**item).dict() for item in submit_list]
+
+    redis_client.set(cache_key, json.dumps(result), ex=300)
+
+    return {'items': result}
+
+    # for items in search_result['items']:
+    #     submit_list.append(items)
         
-    return {'items': submit_list}
+    # return {'items': submit_list}
 
 @app.post("/add_admin", response_model=schemas.Admin, tags=['Admin'])
 def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
@@ -312,7 +362,7 @@ async def submitting_quiz(
                   q8: str = Form(...),
                   q9: str = Form(...),
                   q10: str = Form(...),
-                  budget: int = Form, db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
+                  budget: int = Form(...), db: Session = Depends(get_db), file: Optional[UploadFile] = File(None)):
     selfie_result = {}
     if file is not None:
         if not file.content_type.startswith("image/"):
