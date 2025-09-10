@@ -147,25 +147,16 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
 @app.get("/shop", response_class=HTMLResponse)
 def shop(request: Request):
     return templates.TemplateResponse("shop.html", {"request": request})
-@app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
+@app.get("/product/all_products", tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
     products = db.query(models.Products).all()
-    # browse_create = {}
-    # for i in products:
-
-    #     browse_create['user_id'] = user_in_code
-    #     browse_create['product_id'] = i.product_id
-    #     browse_create['interaction_type'] = 'view'
-    #     new_browse = models.Browsing_History(**browse_create)
-    #     db.add(new_browse)
-    # db.commit()
-    # db.refresh(new_browse)
     return products
 
 
 @app.post('/shop/add_to_cart', tags=['Shop'])
 def add_to_cart(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     global user_in_code
+    print("Received body:", product.dict())
     db_product = db.query(models.Products).filter(models.Products.product_id == product.product_id).first()
     if not db_product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -196,7 +187,7 @@ def checkout(db: Session = Depends(get_db)):
 
         if db_product.count == 0:
             db_product.Status = False
-        # status_text = 'available' if db_product.Status else 'Out of stock'
+
 
         purchase = models.Purchase_History(
             user_id=user_in_code,
@@ -209,25 +200,7 @@ def checkout(db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Checkout successful. Purchase completed."}
 
-# @app.post("/shopping", response_model=schemas.PurchaseHistoryCreate, tags=['Shop'])
-# def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
-#     global user_in_code
-#     new_product_data = {'user_id': user_in_code, 'product_id': product.product_id, 'quantity': product.quantity}
-#     new_product = models.Purchase_History(**new_product_data)
-#     db.add(new_product)
-#     db.commit()
-#     db.refresh(new_product)
-#     browse_create = {}
-#     browse_create['user_id'] = user_in_code
-#     browse_create['product_id'] = product.product_id
-#     browse_create['interaction_type'] = 'view'
-#     new_browse = models.Browsing_History(**browse_create)
-#     db.add(new_browse)
-#     db.commit()
-#     db.refresh(new_browse)
-#     return Response(content='You will be happy you choose us', status_code=201)
-
-
+    
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
     search_result = search_in_database(user_in_code, search.search)
@@ -263,32 +236,6 @@ def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
 def quiz_questions():
     return {"questions": questions.questions}
 
-# @app.post('/quiz/submit',  tags=['Quiz'])
-# def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
-#     answers = {
-#         "q1": data.q1.value,
-#         "q2": data.q2.value,
-#         "q3": data.q3.value,
-#         "q4": data.q4.value,
-#         "q5": data.q5.value,
-#         "q6": data.q6.value,
-#         "q7": data.q7.value,
-#         "q8": data.q8.value,
-#         "q9": data.q9.value,
-#         "q10": data.q10.value,
-#     }
-#     result = utils.analyze_quiz(answers)
-#     quiz = models.Quiz_result(
-#         user_id=data.user_id,
-#         skin_type=result["skin_type"],
-#         concerns=result["concerns"],
-#         preferences=result["preferences"]
-#     )
-#     db.add(quiz)
-#     db.commit()
-#     db.refresh(quiz)
-
-#     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
 
 
 
@@ -303,21 +250,6 @@ def generate_routine():
     return add_product(user_in_code)
 
 
-
-
-
-# @app.post('/quiz/selfie', tags=['Quiz'])
-# async def selfie_analyze(file: UploadFile= File(...), db: Session = Depends(get_db)):
-#     files = {"image":(file.filename, await file.read(), file.content_type)}
-
-#     headers = {'X-API-KEY':  AILAB_API_KEY}
-
-#     response = requests.post(AILAB_URL, files = files, headers= headers)
-
-#     if response.status_code == 200:
-#         return response.json()
-#     else:
-#         return {'error': response.text}
 @app.get('/quiz', response_class=HTMLResponse)
 def quiz(request: Request):
     return templates.TemplateResponse('Quiz.html', {'request': request})
@@ -363,35 +295,14 @@ async def submitting_quiz(
 
 
     quiz_result = utils.analyze_quiz(answers)
-    # complete_database = {'user_id': user_in_code, 'password': '1', 'skin_type': quiz_result['skin_type'], 'concerns': quiz_result['concerns'],
-    #                      'preferences': quiz_result['preferences'], 'device_type': 'mobile'}
-    # print(complete_database)
-    # user_skin_property = models.Users(**complete_database)
-    # db.add(user_skin_property)
-    # db.commit()
-    # db.refresh(user_skin_property)
     if selfie_result:
         final_result_data = merge_results(selfie_result, quiz_result)
-        # final = models.FinalResult(user_id = user_in_code, 
-        #                        skin_type = final_result_data['skin_type'],
-        #                        concerns = final_result_data['concerns'],
-        #                        preferences = final_result_data['preferences'])
     else:
         final_result_data = quiz_result
         
     conn, cursor = read_database()
     cursor.execute('delete from Users where user_id = ?', (user_in_code, ))
     conn.commit()
-    
-
-    
-
-    
-    # final = models.FinalResult(user_id=user_in_code,
-    #                            selfie_result=selfie_result,
-    #                            quiz_result=quiz_result,
-    #                            final_result=final_result_data)
-    
     final = models.FinalResult(user_id = user_in_code, 
                                skin_type = final_result_data['skin_type'],
                                concerns = final_result_data['concerns'],
@@ -410,3 +321,15 @@ async def submitting_quiz(
         "final_result": final_result_data,
         "message": "Conclusion has been successfully saved!"
     }
+
+@app.get("/detail", response_class=HTMLResponse)
+def product_page(request: Request, id: int):
+    return templates.TemplateResponse("product.html", {"request": request, "id": id})
+
+
+@app.get("/product/{id}")
+def get_product(id: int, db: Session = Depends(get_db)):
+    product = db.query(models.Products).filter(models.Products.product_id == id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product

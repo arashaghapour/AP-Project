@@ -1,0 +1,133 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f8f8f8;
+  margin: 0;
+  padding: 0;
+}
+
+.product-container {
+  display: flex;
+  width: 90%;
+  max-width: 1400px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+.product-image {
+  flex: 1;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px 0 0 12px;
+}
+
+.product-details {
+  flex: 1.2;
+  padding: 30px;
+}
+
+.product-details h1 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.product-table th {
+  text-align: left;
+  background: #f1f1f1;
+  padding: 10px;
+  width: 30%;
+  color: #555;
+}
+
+.product-table td {
+  padding: 10px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+.add-to-cart {
+  padding: 12px 20px;
+  background: #4caf50;
+  border: none;
+  color: white;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.add-to-cart:hover {
+  background: #43a047;
+}
+.site-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
+}
+.logo a {
+  font-size: 40px;
+  font-weight: 700;
+  color: #0dcbbc;
+  text-decoration: none;
+}
+.logo :hover {
+  color: #088177;
+}
+.navbar {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 25px;
+}
+.navbar ul li a {
+  text-decoration: none;
+  font-size: 16px;
+  color: #333;
+  transition: 0.3s;
+}
+
+.navbar ul li a:hover,
+.navbar ul li a.active {
+  color: #0dcbbc;
+}
+.search-bar {
+  display: flex;
+  gap: 10px;
+}
+
+.search-bar input {
+  padding: 8px 24px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-bar button {
+  padding: 8px 15px;
+  font-size: 15px;
+  background: #0dcbbc;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-bar button:hover {
+  background: #088177;
+}

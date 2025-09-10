@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Product Detail</title>
+    <link rel="stylesheet" href="../static/Shop-single.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav-container">
+        <div class="logo">
+          <a href="index.html">Skin Shop</a>
+        </div>
+        <nav class="navbar">
+          <ul>
+            <li><a href="index.html" class="active">Shop</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="/quiz">Quiz</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="login">logout</a></li>
+          </ul>
+        </nav>
+        <div class="search-bar">
+          <input type="text" placeholder="Search products..." />
+          <button type="submit">Search</button>
+        </div>
+      </div>
+    </header>
+    <div class="product-container">
+      <div class="product-image">
+        <img
+          id="product-image"
+          src="../static/images/shop_01.jpg"
+          alt="Product"
+          style="max-width: 300px; height: auto; border-radius: 10px"
+        />
+      </div>
+
+      <div class="product-details">
+        <h1 id="product-name">Loading...</h1>
+
+        <table class="product-table">
+          <tr>
+            <th>Product Brand</th>
+            <td id="product-brand">-</td>
+          </tr>
+          <tr>
+            <th>Skin Type</th>
+            <td id="product-skin">-</td>
+          </tr>
+          <tr>
+            <th>Category</th>
+            <td id="product-category">-</td>
+          </tr>
+          <tr>
+            <th>Concerns</th>
+            <td id="product-concerns">-</td>
+          </tr>
+          <tr>
+            <th>Count</th>
+            <td id="product-count">-</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td id="product-status">-</td>
+          </tr>
+          <tr>
+            <th>Price</th>
+            <td id="product-price">-</td>
+          </tr>
+        </table>
+
+        <button class="add-to-cart" onclick="addToCart()">
+          Add to Cart 🛒
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const productId = params.get("id");
+
+      async function loadProductDetails() {
+        if (!productId) {
+          alert("Product ID not found in URL");
+          return;
+        }
+
+        const res = await fetch(`/product/${productId}`);
+        const prod = await res.json();
+        let imgSrc = "../static/images/serum.jpg";
+        if (prod.category === "cleanser") {
+          imgSrc = "../static/images/cleanser.jpg";
+        } else if (prod.category === "moisturizer") {
+          imgSrc = "../static/images/moisturizer.jpg";
+        } else if (prod.category === "serum") {
+          imgSrc = "../static/images/serum.jpg";
+        }
+        console.log(imgSrc);
+        document.getElementById("product-image").src = imgSrc;
+        document.getElementById("product-name").innerText = prod.name;
+        document.getElementById("product-brand").innerText =
+          prod.brand || "N/A";
+        document.getElementById("product-skin").innerText =
+          prod.skin_types || "N/A";
+        document.getElementById("product-category").innerText =
+          prod.category || "N/A";
+        document.getElementById("product-concerns").innerText =
+          prod.concerns_targeted || "N/A";
+        document.getElementById("product-count").innerText =
+          prod.count || "N/A";
+        document.getElementById("product-status").innerText =
+          prod.Status || "N/A";
+        document.getElementById("product-price").innerText = `$${prod.price}`;
+      }
+
+      async function addToCart() {
+        const res = await fetch("/shop/add_to_cart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product_id: productId, quantity: 1 }),
+        });
+        const data = await res.json();
+        alert(data.message || "Added to cart!");
+      }
+
+      loadProductDetails();
+    </script>
+  </body>
+</html>

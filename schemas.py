@@ -208,3 +208,5 @@ class RoutineOut(BaseModel):
     Plan_name: str
     step: List[StepOut]
 
+class name(BaseModel):
+    name: str
