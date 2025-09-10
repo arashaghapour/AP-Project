@@ -13,6 +13,7 @@ import requests
 from .add_product_to_routin import add_product
 import sqlite3
 import random
+from .redis_client import redis_client
 ############################
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -132,6 +133,18 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
 
 @app.get("/product/all_products", response_model=List[schemas.ProductCreate], tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
+
+    # cache_key = 'all_products'
+    # cached_products = redis_client.get(cache_key)
+    # if cached_products:
+    #     return json.loads(cached_products)
+    
+    # products = db.query(models.Products).all()
+    # result = [schemas.ProductCreate.from_orm(p).dict() for p in products]
+
+    # redis_client.set(cache_key, json.dumps(result), ex=600)
+    # return result
+
     products = db.query(models.Products).all()
     browse_create = {}
     for i in products:
@@ -192,27 +205,36 @@ def checkout(db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Checkout successful. Purchase completed."}
 
-# @app.post("/shopping", response_model=schemas.PurchaseHistoryCreate, tags=['Shop'])
-# def Shopping(product: schemas.Purchase_input, db: Session = Depends(get_db)):
-#     global user_in_code
-#     new_product_data = {'user_id': user_in_code, 'product_id': product.product_id, 'quantity': product.quantity}
-#     new_product = models.Purchase_History(**new_product_data)
-#     db.add(new_product)
-#     db.commit()
-#     db.refresh(new_product)
-#     browse_create = {}
-#     browse_create['user_id'] = user_in_code
-#     browse_create['product_id'] = product.product_id
-#     browse_create['interaction_type'] = 'view'
-#     new_browse = models.Browsing_History(**browse_create)
-#     db.add(new_browse)
-#     db.commit()
-#     db.refresh(new_browse)
-#     return Response(content='You will be happy you choose us', status_code=201)
 
 
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
 def search_input(search: schemas.Search, db: Session = Depends(get_db)):
+
+    # cached_result = redis_client.get(cache_key)
+    # if cached_result:
+    #     return {'items': json.loads(cached_result)}
+    
+
+    # search_result = search_in_database(user_in_code, search.search)
+    # browse_create = {}
+    # submit_list = search_result['items'][:3]
+    
+    # for items in submit_list:
+    #     browse_create['user_id'] = user_in_code
+    #     browse_create['product_id'] = items['product_id']
+    #     browse_create['interaction_type'] = 'view'
+    #     new_browse = models.Browsing_History(**browse_create)
+    #     db.add(new_browse)
+
+    # db.commit()
+    
+    # result = [schemas.ProductCreate(**item).dict() for item in submit_list]
+
+    # redis_client.set(cache_key, json.dumps(result), ex=300)
+
+    # return {'items': result}
+
+
     search_result = search_in_database(user_in_code, search.search)
     browse_create = {}
     count1 = 0
@@ -248,34 +270,6 @@ def create_user(user: schemas.Admin, db: Session = Depends(get_db)):
 def quiz_questions():
     return {"questions": questions.questions}
 
-# @app.post('/quiz/submit',  tags=['Quiz'])
-# def submitting_quiz(data: schemas.QuizQuestions, db: Session = Depends(get_db)):
-#     answers = {
-#         "q1": data.q1.value,
-#         "q2": data.q2.value,
-#         "q3": data.q3.value,
-#         "q4": data.q4.value,
-#         "q5": data.q5.value,
-#         "q6": data.q6.value,
-#         "q7": data.q7.value,
-#         "q8": data.q8.value,
-#         "q9": data.q9.value,
-#         "q10": data.q10.value,
-#     }
-#     result = utils.analyze_quiz(answers)
-#     quiz = models.Quiz_result(
-#         user_id=data.user_id,
-#         skin_type=result["skin_type"],
-#         concerns=result["concerns"],
-#         preferences=result["preferences"]
-#     )
-#     db.add(quiz)
-#     db.commit()
-#     db.refresh(quiz)
-
-#     return {"quiz_id": quiz.quiz_id, "message": "Quiz submitted"}
-
-
 
 from . import models
 
@@ -284,21 +278,6 @@ def generate_routine():
     return add_product(user_in_code)
 
 
-
-
-
-# @app.post('/quiz/selfie', tags=['Quiz'])
-# async def selfie_analyze(file: UploadFile= File(...), db: Session = Depends(get_db)):
-#     files = {"image":(file.filename, await file.read(), file.content_type)}
-
-#     headers = {'X-API-KEY':  AILAB_API_KEY}
-
-#     response = requests.post(AILAB_URL, files = files, headers= headers)
-
-#     if response.status_code == 200:
-#         return response.json()
-#     else:
-#         return {'error': response.text}
 
 @app.post('/quiz/submit', tags=['Quiz'])
 async def submitting_quiz(
