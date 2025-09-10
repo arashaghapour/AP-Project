@@ -3,21 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <title>Product Detail</title>
-    <link rel="stylesheet" href="../static/Shop-single.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='Shop-single.css') }}" />
   </head>
   <body>
     <header class="site-header">
       <div class="container nav-container">
         <div class="logo">
-          <a href="index.html">Skin Shop</a>
+          <a href="Shop.html">Skin Shop</a>
         </div>
         <nav class="navbar">
           <ul>
-            <li><a href="index.html" class="active">Shop</a></li>
+            <li><a href="/shop" class="active">Shop</a></li>
             <li><a href="about.html">About</a></li>
             <li><a href="/quiz">Quiz</a></li>
             <li><a href="contact.html">Contact</a></li>
-            <li><a href="login">logout</a></li>
+            <li><a href="/login">logout</a></li>
           </ul>
         </nav>
         <div class="search-bar">
@@ -26,6 +26,7 @@
         </div>
       </div>
     </header>
+
     <div class="product-container">
       <div class="product-image">
         <img

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Response, File, UploadFile, Form, Request
+from fastapi import FastAPI, Depends, HTTPException, Response, File, UploadFile, Form, Request, Body
 from sqlalchemy.orm import Session
 from . import schemas, models, utils, questions
 from .database import Base, engine, get_db
@@ -29,6 +29,9 @@ user_in_code = None
 templates = Jinja2Templates(directory="./AP-Project/templates")
 app.mount("/static", StaticFiles(directory="./AP-Project/static"), name="static")
 @app.post('/generate random database', tags=['fill database'])
+
+
+
 def add_product_to_database(db: Session = Depends(get_db)):
     Products = []
     for i in range(1000):
@@ -163,8 +166,7 @@ def add_to_cart(product: schemas.Purchase_input, db: Session = Depends(get_db)):
     
     if db_product.count < product.quantity:
         raise HTTPException(status_code=400, detail="Not enough stock available")
-    
-    cart_item = models.Cart(user_id=user_in_code, product_id=product.product_id, quantity=product.quantity)
+    cart_item = models.Cart(user_id=user_in_code, product_id=product.product_id, quantity=product.quantity, name=db_product.name, brand=db_product.brand, category=db_product.category, price=db_product.price)
     db.add(cart_item)
     db.commit()
     db.refresh(cart_item)
@@ -172,33 +174,28 @@ def add_to_cart(product: schemas.Purchase_input, db: Session = Depends(get_db)):
 
 
 @app.post('/shop/checkout', tags=['Shop'])
-def checkout(db: Session = Depends(get_db)):
+def checkout(purchases: List[schemas.purchases_json] = Body(...), db: Session = Depends(get_db)):
     global user_in_code
-    cart_items = db.query(models.Cart).filter(models.Cart.user_id == user_in_code).all()  
-    if not cart_items:
-        raise HTTPException(status_code=400, detail="Cart is empty")
-    
-    for item in cart_items:
-        db_product = db.query(models.Products).filter(models.Products.product_id == item.product_id).first()
-        if not db_product or db_product.count < item.quantity:
-            raise HTTPException(status_code=400, detail=f"Product {item.product_id} is out of stock or insufficient")
-        
-        db_product.count -= item.quantity
+    print('hello_world')
 
-        if db_product.count == 0:
-            db_product.Status = False
+    for i in purchases:
+        prod = db.query(models.Products).filter(models.Products.product_id == i.id).first()
+        if prod and prod.count >= i.quantity:
+            prod.count -= i.quantity
+            new_pur = models.Purchase_History(
+                user_id=user_in_code,
+                product_id=i.id,
+                quantity=i.quantity
+            )
+            db.add(new_pur)
+        else:
+           
+            print(f"Product {i.id} not enough stock")
 
-
-        purchase = models.Purchase_History(
-            user_id=user_in_code,
-            product_id=item.product_id,
-            quantity=item.quantity
-        )
-        db.add(purchase)
-
-    db.query(models.Cart).filter(models.Cart.user_id == user_in_code).delete()
     db.commit()
+    print('checkout done')
     return {"message": "Checkout successful. Purchase completed."}
+
 
     
 @app.post("/search", response_model=schemas.Product_out2, tags=['Search'])
@@ -333,3 +330,23 @@ def get_product(id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+@app.get('/api/cart', response_class=HTMLResponse)
+def cart_prod(request: Request):
+    return templates.TemplateResponse("Cart.html", {"request": request})
+@app.get('/get/cart', response_model=list[schemas.CartProduct1])
+def get_cart_product(db: Session = Depends(get_db)):
+    carts = db.query(models.Cart).all()
+    result = []
+    for c in carts:
+        result.append(
+            schemas.CartProduct1(
+                product_id=c.product.product_id,
+                name=c.product.name,
+                brand=c.product.brand,
+                category=c.product.category,
+                price=float(c.product.price),
+                quantity=c.quantity
+            )
+        )
+    print(result)
+    return result

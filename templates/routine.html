@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skin Shop - Routine Products</title>
-    <link rel="stylesheet" href="../static/style.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -24,6 +24,7 @@
             <li><a href="about.html">About</a></li>
             <li><a href="/quiz">Quiz</a></li>
             <li><a href="contact.html">Contact</a></li>
+            <li><a href="/login">LogOut</a></li>
           </ul>
         </nav>
         <div class="search-bar">
@@ -101,6 +102,7 @@
           container.appendChild(planDiv);
 
           plan.step.forEach((step) => {
+            console.log(step);
             const names = step.product_name
               .split(", ")
               .map((p) => p.trim())
@@ -109,8 +111,16 @@
             names.forEach((prodName) => {
               const div = document.createElement("div");
               div.className = "product";
+              let imgSrc = "../static/images/serum.jpg";
+              if (step.step_name === "cleanser") {
+                imgSrc = "../static/images/cleanser.jpg";
+              } else if (step.step_name === "moisturizer") {
+                imgSrc = "../static/images/moisturizer.jpg";
+              } else if (step.step_name === "serum") {
+                imgSrc = "../static/images/serum.jpg";
+              }
               div.innerHTML = `
-                <img src="../static/images/shop_01.jpg" alt="Product Image">
+                <img src="${imgSrc}" alt="Product Image">
                 <h4>${prodName}</h4>
                 <p>Step: ${step.step_name}</p>
                 <p>${step.instructions}</p>

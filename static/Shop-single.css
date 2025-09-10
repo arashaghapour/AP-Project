@@ -1,10 +1,39 @@
-body {
-  font-family: Arial, sans-serif;
-  background: #f8f8f8;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
 }
 
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Poppins", sans-serif;
+  background-color: #fff;
+  color: #333;
+  line-height: 1.6;
+}
+
+body.Signup-page,
+body.Login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-size: cover;
+  overflow: hidden;
+  position: relative;
+}
+
+body.Signup-page {
+  background: url(../static/images/Sign-up-background.jpg);
+  background-size: cover;
+}
+
+body.Login-page {
+  background: url(../static/images/Sign-in-background.jpg);
+  background-size: cover;
+}
 .product-container {
   display: flex;
   width: 90%;
@@ -15,6 +44,7 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
+
 .product-image {
   flex: 1;
   background: #fafafa;
@@ -75,25 +105,39 @@ body {
   border-bottom: 1px solid #ddd;
   padding: 15px 0;
 }
+
+.nav-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
 .logo a {
   font-size: 40px;
   font-weight: 700;
   color: #0dcbbc;
   text-decoration: none;
 }
-.logo :hover {
-  color: #088177;
-}
+
 .navbar {
   flex: 1;
   display: flex;
   justify-content: center;
 }
+
+.logo :hover {
+  color: #088177;
+}
+
 .navbar ul {
   list-style: none;
   display: flex;
   gap: 25px;
 }
+
 .navbar ul li a {
   text-decoration: none;
   font-size: 16px;
@@ -105,6 +149,7 @@ body {
 .navbar ul li a.active {
   color: #0dcbbc;
 }
+
 .search-bar {
   display: flex;
   gap: 10px;

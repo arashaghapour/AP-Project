@@ -82,6 +82,10 @@ class Cart(Base):
     __tablename__ = "Cart"
     id = Column(Integer, primary_key=True, index= True)
     user_id = Column(Integer, ForeignKey("Users.user_id"))
+    name = Column(String)
+    brand = Column(String)
+    category = Column(String)
+    price = Column(Float)
     product_id = Column(Integer, ForeignKey("Products.product_id"))
     quantity = Column(Integer, nullable=False)
 

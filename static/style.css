@@ -523,3 +523,23 @@ form .sign-up a:hover {
 .team-member a:hover {
   text-decoration: underline;
 }
+.cart-icon {
+  position: relative;
+  margin-left: 20px;
+}
+
+.cart-icon i {
+  font-size: 24px;
+  color: #333;
+}
+
+#cart-count {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  background-color: red;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 50%;
+}

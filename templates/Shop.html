@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Skin Shop - Products Page</title>
-    <link rel="stylesheet" href="../static/style.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -27,6 +27,12 @@
             <li><a href="login">logout</a></li>
           </ul>
         </nav>
+        <div class="cart-icon">
+          <a href="/api/cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="cart-count">0</span>
+          </a>
+        </div>
         <div class="search-bar">
           <input type="text" placeholder="Search products..." />
           <button type="submit">Search</button>
@@ -128,8 +134,17 @@
         products.forEach((prod) => {
           const div = document.createElement("div");
           div.className = "product";
+          div.className = "product";
+          let imgSrc = "../static/images/serum.jpg";
+          if (prod.category === "cleanser") {
+            imgSrc = "../static/images/cleanser.jpg";
+          } else if (prod.category === "moisturizer") {
+            imgSrc = "../static/images/moisturizer.jpg";
+          } else if (prod.category === "serum") {
+            imgSrc = "../static/images/serum.jpg";
+          }
           div.innerHTML = `
-        <img src="../static/images/shop_01.jpg" alt="Product Image">
+        <img src="${imgSrc}" alt="Product Image">
         <h3>${prod.name}</h3>
         <p>${prod.brand || "No description"}</p>
         <p>${prod.category || "No description"}</p>

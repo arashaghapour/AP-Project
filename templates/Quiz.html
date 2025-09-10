@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Routine Quiz</title>
-    <link rel="stylesheet" href="../static/Quiz.css" />
+    <link rel="stylesheet" href="{{ url_for('static', path='Quiz.css') }}" />
   </head>
   <body>
     <div class="container">
@@ -159,7 +159,9 @@
             </label>
           </div>
         </div>
-        <button type="button" onclick="submitQuiz()">Save My Information 🧮</button>
+        <button type="button" onclick="submitQuiz()">
+          Save My Information 🧮
+        </button>
       </form>
 
       <div id="result"></div>

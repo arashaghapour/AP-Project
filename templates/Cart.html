@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shopping Cart</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='Cart.css') }}" />
+  </head>
+  <body>
+    <div class="cart-container">
+      <h1>Shopping Cart 🛒</h1>
+
+      <div id="cartItems"></div>
+
+      <div class="cart-summary">
+        <h3>Grand Total: <span id="grandTotal">$0</span></h3>
+        <button id="checkout" class="checkout">Proceed to Checkout</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const cartItemsEl = document.getElementById("cartItems");
+        const grandTotalEl = document.getElementById("grandTotal");
+
+        let items = [];
+        try {
+          const res = await fetch("/get/cart");
+          if (!res.ok) throw new Error("Failed to fetch cart");
+          items = await res.json();
+        } catch (error) {
+          console.error("Error fetching cart:", error);
+          cartItemsEl.innerHTML = "<p>Failed to load cart items.</p>";
+          return;
+        }
+
+
+        items.forEach((product) => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "cart-item";
+
+
+          itemEl.dataset.id = product.product_id;
+          console.log("product_id:", product.product_id);
+
+          let imgSrc = "../static/images/serum.jpg";
+          if (product.category === "cleanser")
+            imgSrc = "../static/images/cleanser.jpg";
+          else if (product.category === "moisturizer")
+            imgSrc = "../static/images/moisturizer.jpg";
+          else if (product.category === "serum")
+            imgSrc = "../static/images/serum.jpg";
+
+          itemEl.innerHTML = `
+            <img src="${imgSrc}" alt="${product.name}" />
+            <div class="item-details">
+              <h2 class="item-name">${product.name}</h2>
+              <p class="brand">Brand: ${product.brand}</p>
+              <p class="category">Category: ${product.category}</p>
+              <p class="price">Price: $${product.price}</p>
+              <div class="quantity-control">
+                <button class="minus">−</button>
+                <span class="quantity">${product.quantity}</span>
+                <button class="plus">+</button>
+              </div>
+              <p class="total-price">Total: $${
+                product.price * product.quantity
+              }</p>
+            </div>
+          `;
+          cartItemsEl.appendChild(itemEl);
+        });
+
+
+        function updateTotals() {
+          let grandTotal = 0;
+          const cartItemEls = document.querySelectorAll(".cart-item");
+          cartItemEls.forEach((item) => {
+            const price = parseFloat(
+              item.querySelector(".price").textContent.replace("Price: $", "")
+            );
+            const quantity = parseInt(
+              item.querySelector(".quantity").textContent
+            );
+            const total = price * quantity;
+            item.querySelector(".total-price").textContent = `Total: $${total}`;
+            grandTotal += total;
+          });
+          grandTotalEl.textContent = `$${grandTotal}`;
+        }
+
+        const cartItemEls = document.querySelectorAll(".cart-item");
+        cartItemEls.forEach((item) => {
+          const minusBtn = item.querySelector(".minus");
+          const plusBtn = item.querySelector(".plus");
+          const qtyEl = item.querySelector(".quantity");
+
+          minusBtn.addEventListener("click", () => {
+            let qty = parseInt(qtyEl.textContent);
+            if (qty > 1) qtyEl.textContent = qty - 1;
+            updateTotals();
+          });
+
+          plusBtn.addEventListener("click", () => {
+            let qty = parseInt(qtyEl.textContent);
+            qtyEl.textContent = qty + 1;
+            updateTotals();
+          });
+        });
+
+        updateTotals();
+
+
+        document
+          .getElementById("checkout")
+          .addEventListener("click", async () => {
+            const cartItemEls = document.querySelectorAll(".cart-item");
+            const cartData = [];
+            cartItemEls.forEach((item) => {
+              const id = Number(item.dataset.id); 
+              const quantity = parseInt(
+                item.querySelector(".quantity").textContent
+              );
+              cartData.push({ id, quantity });
+            });
+
+            console.log("Sending cartData:", cartData);
+
+            try {
+              const res = await fetch("/shop/checkout", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(cartData),
+              });
+
+              if (!res.ok) throw new Error("Checkout failed");
+
+              const result = await res.json();
+              alert(result.message || "Purchase completed!");
+            } catch (error) {
+              console.error("Checkout error:", error);
+              alert("Failed to complete purchase.");
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

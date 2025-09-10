@@ -137,7 +137,21 @@ class ContextualSignalCreate(BaseModel):
     device_type: str
     season: str
     
-    
+class CartProduct(BaseModel):
+    product_id: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+class CartProduct1(BaseModel):
+    product_id: int
+    name: str
+    brand: str
+    category: str
+    price: float
+    quantity: int
+    class Config:
+        orm_mode = True
 class LoginRequest(BaseModel):
     user_id: int
     password: str
@@ -210,3 +224,8 @@ class RoutineOut(BaseModel):
 
 class name(BaseModel):
     name: str
+class purchases_json(BaseModel):
+    id: int
+    quantity: int
+class purchases_json2(BaseModel):
+    items: List[purchases_json]
