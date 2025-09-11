@@ -7,5 +7,3 @@ pydantic
 passlib[bcrypt]
 python-jose[cryptography]
 requests
-redis
-jsonjinja2
