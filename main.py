@@ -13,7 +13,7 @@ import requests
 from .add_product_to_routin import add_product
 import sqlite3
 import random
-from .redis_client import redis_client
+# from .redis_client import redis_client
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -200,6 +200,8 @@ def checkout(purchases: List[schemas.purchases_json] = Body(...), db: Session = 
                 product_id=i.id,
                 quantity=i.quantity
             )
+            cart_prod = db.query(models.Cart).filter(models.Cart.product_id == i.id).first()
+            db.delete(cart_prod)
             db.add(new_pur)
         else:
            
