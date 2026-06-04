@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Response, File, UploadFile, Form, Request, Body
 from sqlalchemy.orm import Session
 from . import schemas, models, utils, questions
-from .database import Base, engine, get_db
+from .database import Base, engine, get_db, SessionLocal
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer
 from .token_utils import create_access_token
@@ -18,42 +18,61 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
+def add_product_to_database():
+    db = SessionLocal()
+    try:
+        existing_products_count = db.query(models.Products).count()
+        if existing_products_count > 0:
+            print(f"⚠️ Database already has {existing_products_count} products. Skipping generation.")
+            return
 
+        print("🚀 Generating 1000 random products...")
+        Products = []
+        for i in range(1000):
+            len_of_skintype = random.randint(1, 5)
+            len_of_concens = random.randint(1, 4)
+            product = models.Products(
+                name=f'product {i}',
+                brand=random.choice(['iran', 'turkey', 'america', 'german', 'france']), 
+                category=random.choice(['cleanser', 'serum',  'moisturizer']),            
+                skin_types= list(set([random.choice(['oily', 'dry', 'sensitive', 'combination']) for _ in range(len_of_skintype)])), # i به _ تبدیل شد تا با i حلقه اصلی تداخل نکند
+                concerns_targeted=list(set([random.choice(['acne', 'combination', 'dullness']) for _ in range(len_of_concens)])),
+                ingredients = ['string'],
+                price=random.randrange(1000, 10000),
+                rating = round(random.uniform(3.6, 5), 2),
+                image_url = 'string',
+                tags = ['string'],
+                count = random.randint(10, 10000)
+            )
+            Products.append(product)
+        db.bulk_save_objects(Products)
+        db.commit()
+        print("✅ 1000 products added successfully!")
+    except Exception as e:
+        print(f"❌ Error seeding database: {e}")
+        db.rollback()
+    finally:
+        db.close()
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    add_product_to_database()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 AILAB_API_KEY = "cmea2907w0001jo041hntvzpp"
 AILAB_URL = "https://api.ailabtools.com/skin/analyze"
 user_in_code = None
-templates = Jinja2Templates(directory="./AP-Project/templates")
-app.mount("/static", StaticFiles(directory="./AP-Project/static"), name="static")
+templates = Jinja2Templates(directory="./templates")
+app.mount("/static", StaticFiles(directory="./static"), name="static")
 @app.post('/generate random database', tags=['fill database'])
 
 
-
-def add_product_to_database(db: Session = Depends(get_db)):
-    Products = []
-    for i in range(1000):
-        len_of_skintype = random.randint(1, 5)
-        len_of_concens = random.randint(1, 4)
-        product = models.Products(
-            name=f'product {i}',
-            brand=random.choice(['iran', 'turkey', 'america', 'german', 'france']), 
-            category=random.choice(['cleanser', 'serum',  'moisturizer']),            
-            skin_types= list(set([random.choice(['oily', 'dry', 'sensitive', 'combination']) for i in range(len_of_skintype)])),
-            concerns_targeted=list(set([random.choice(['acne', 'combination', 'dullness']) for i in range(len_of_concens)])),
-            ingredients = ['string'],
-            price=random.randrange(1000, 10000),
-            rating = round(random.uniform(3.6, 5), 2),
-            image_url = 'string',
-            tags = ['string'],
-            count = random.randint(10, 10000)
-        )
-        Products.append(product)
-    db.bulk_save_objects(Products)
-    db.commit()
 
 
 def read_database():
@@ -87,49 +106,54 @@ def merge_results(selfie_result: dict, quiz_result: dict) -> dict:
 
 @app.get("/signup", response_class=HTMLResponse)
 def signup(request: Request):
-    return templates.TemplateResponse("Sign-up.html", {"request": request})
+    return templates.TemplateResponse(request, "Sign-up.html")
+
+
 @app.post("/Account/sign_up", tags=['Account'])
 def create_user(db: Session = Depends(get_db), username: str = Form(...), password: str = Form(...)):
-    user_data = {'user_name':username, 'password':password}
+    user_data = {'user_name': username, 'password': password}
     user_data["password"] = pwd_context.hash(password)
     new_user = models.Users_for_sign_up(**user_data)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
     global user_in_code
-    conn, cursor = read_database()
-    user_id = find_user_id(cursor, username)
-    user_in_code = user_id
+    user_in_code = new_user.user_id
+    
     token_data = {"sub": str(user_in_code), "role": 'normal user'} 
     token = create_access_token(token_data)
+    
     response = RedirectResponse(url="/shop", status_code=302)
     response.set_cookie(key="access_token", value=token, httponly=True)
     return response
+
+
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
+
+
 @app.post("/Account/login", tags=['Account'])
 def review_user(request: Request, db: Session = Depends(get_db), username: str = Form(...), password: str = Form(...)):
     global user_in_code
     
-    conn, cursor = read_database()
-    user_id = find_user_id(cursor, username)
     user_review = db.query(models.Users_for_sign_up).filter(models.Users_for_sign_up.user_name == username).first()
     admin_review = db.query(models.Admins).filter(models.Admins.user_name == username).first()
+    
     if user_review and pwd_context.verify(password, user_review.password):
         user_in_code = user_review.user_id
         token = create_access_token({"sub": str(user_in_code), "role": "user"})
         response = RedirectResponse(url="/shop", status_code=302)
         response.set_cookie(key="access_token", value=token, httponly=True)
         return response
-    else:
-        return templates.TemplateResponse('login.html', {"request": request})
-    if admin_review and pwd_context.verify(password, admin_review.password):
-        token = create_access_token({"sub": str(user.user_id), "role": "admin"})
+        
+    elif admin_review and pwd_context.verify(password, admin_review.password):
+        token = create_access_token({"sub": str(admin_review.user_id), "role": "admin"})
         return {"access_token": token, "token_type": "bearer"}
-
-    raise HTTPException(status_code=401, detail="Invalid credentials")
-
+        
+    else:
+        return templates.TemplateResponse(request, 'login.html', context={"error": "نام کاربری یا رمز عبور اشتباه است"})
 @app.post("/product/add_product", response_model=schemas.ProductCreate, tags=['Product'])
 def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     product_data = product.dict()
@@ -150,21 +174,11 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
 
 @app.get("/shop", response_class=HTMLResponse)
 def shop(request: Request):
-    return templates.TemplateResponse("shop.html", {"request": request})
+    return templates.TemplateResponse(request, "shop.html")
+
+
 @app.get("/product/all_products", tags=['Product'])
 def get_all_products(db: Session = Depends(get_db)):
-
-    # cache_key = 'all_products'
-    # cached_products = redis_client.get(cache_key)
-    # if cached_products:
-    #     return json.loads(cached_products)
-    
-    # products = db.query(models.Products).all()
-    # result = [schemas.ProductCreate.from_orm(p).dict() for p in products]
-
-    # redis_client.set(cache_key, json.dumps(result), ex=600)
-    # return result
-
     products = db.query(models.Products).all()
     return products
 
@@ -360,9 +374,10 @@ async def submitting_quiz(
         "message": "Conclusion has been successfully saved!"
     }
 
+
 @app.get("/detail", response_class=HTMLResponse)
 def product_page(request: Request, id: int):
-    return templates.TemplateResponse("product.html", {"request": request, "id": id})
+    return templates.TemplateResponse(request, "product.html", context={"id": id})
 
 
 @app.get("/product/{id}")
@@ -371,9 +386,13 @@ def get_product(id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+
+
 @app.get('/api/cart', response_class=HTMLResponse)
 def cart_prod(request: Request):
-    return templates.TemplateResponse("Cart.html", {"request": request})
+    return templates.TemplateResponse(request, "Cart.html")
+
+
 @app.get('/get/cart', response_model=list[schemas.CartProduct1])
 def get_cart_product(db: Session = Depends(get_db)):
     carts = db.query(models.Cart).all()

@@ -1,9 +1,10 @@
 fastapi
 uvicorn
 sqlalchemy
-passlib
-bcrypt
 pydantic
 passlib[bcrypt]
+bcrypt==4.0.1
 python-jose[cryptography]
 requests
+jinja2
+python-multipart
