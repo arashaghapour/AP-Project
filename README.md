@@ -43,7 +43,7 @@ Skin Shop is a modern, full-stack web application designed for a cosmetics and s
 └── linux_start.sh          # Shell execution script for Linux/Mac
 ```
 ## Quick Start & Installation
-Getting the environment ready and starting the server requires no manual setup. Automation scripts handle virtual environment creation, pip upgrades, dependency installation, and server launching.
+Befor everything download the images that project need on https://drive.iust.ac.ir/index.php/s/AWw7GJBPaSkmrnx and extract the images folder into static folder then getting the environment ready and starting the server requires no manual setup. Automation scripts handle virtual environment creation, pip upgrades, dependency installation, and server launching.
 
 ## On Windows
 Simply double-click the execution batch file located in the root directory:
