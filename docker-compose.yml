@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  skin_shop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: skin_shop_container
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      # مپ کردن اختصاصی خودِ فایل دیتابیس از سیستم شما به پوشه src کانتینر
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

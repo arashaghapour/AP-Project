@@ -106,7 +106,7 @@ def merge_results(selfie_result: dict, quiz_result: dict) -> dict:
 
 @app.get("/signup", response_class=HTMLResponse)
 def signup(request: Request):
-    return templates.TemplateResponse(request, "Sign-up.html")
+    return templates.TemplateResponse("Sign-up.html", {"request": request})
 
 
 @app.post("/Account/sign_up", tags=['Account'])
@@ -131,7 +131,7 @@ def create_user(db: Session = Depends(get_db), username: str = Form(...), passwo
 
 @app.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
-    return templates.TemplateResponse(request, "login.html")
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.post("/Account/login", tags=['Account'])
@@ -153,7 +153,7 @@ def review_user(request: Request, db: Session = Depends(get_db), username: str =
         return {"access_token": token, "token_type": "bearer"}
         
     else:
-        return templates.TemplateResponse(request, 'login.html', context={"error": "نام کاربری یا رمز عبور اشتباه است"})
+        return templates.TemplateResponse("login.html", {"request": request, "error": "نام کاربری یا رمز عبور اشتباه است"})
 @app.post("/product/add_product", response_model=schemas.ProductCreate, tags=['Product'])
 def Product_Create(product: schemas.ProductCreate, db: Session = Depends(get_db)):
     product_data = product.dict()
@@ -174,7 +174,7 @@ def deleting_product(product_id: int, db: Session = Depends(get_db)):
 
 @app.get("/shop", response_class=HTMLResponse)
 def shop(request: Request):
-    return templates.TemplateResponse(request, "shop.html")
+    return templates.TemplateResponse("shop.html", {"request": request})
 
 
 @app.get("/product/all_products", tags=['Product'])
@@ -304,7 +304,7 @@ def generate_routine():
 
 @app.get('/quiz', response_class=HTMLResponse)
 def quiz(request: Request):
-    return templates.TemplateResponse('Quiz.html', {'request': request})
+    return templates.TemplateResponse("Quiz.html", {"request": request})
 @app.post('/quiz/submit', tags=['Quiz'])
 async def submitting_quiz(
                   q1: str = Form(...),
@@ -377,7 +377,7 @@ async def submitting_quiz(
 
 @app.get("/detail", response_class=HTMLResponse)
 def product_page(request: Request, id: int):
-    return templates.TemplateResponse(request, "product.html", context={"id": id})
+    return templates.TemplateResponse("product.html", {"request": request, "id": id})
 
 
 @app.get("/product/{id}")
@@ -390,7 +390,7 @@ def get_product(id: int, db: Session = Depends(get_db)):
 
 @app.get('/api/cart', response_class=HTMLResponse)
 def cart_prod(request: Request):
-    return templates.TemplateResponse(request, "Cart.html")
+    return templates.TemplateResponse("Cart.html", {"request": request})
 
 
 @app.get('/get/cart', response_model=list[schemas.CartProduct1])

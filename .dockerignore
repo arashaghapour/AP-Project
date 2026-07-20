@@ -1,11 +1,4 @@
-liberaries
-*.pyc
-.idea/
-database.db
-test.py
-static/images
-__pycache__
-mlenv
+mlenv/
 venv/
 .venv/
 Doc/
@@ -15,10 +8,13 @@ __pycache__/
 *.pyd
 
 data/
+.git/
+.gitignore
 .idea/
 .vscode/
 .env
 0606(3).mp4
 windows_start.bat
+README.md
 linux_start.sh
 Personalized AI Recommendation System with FastAPI.docx

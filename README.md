@@ -43,21 +43,18 @@ Skin Shop is a modern, full-stack web application designed for a cosmetics and s
 └── linux_start.sh          # Shell execution script for Linux/Mac
 ```
 ## Quick Start & Installation
-Befor everything download the images that project need on https://drive.iust.ac.ir/index.php/s/AWw7GJBPaSkmrnx and extract the images folder into static folder then getting the environment ready and starting the server requires no manual setup. Automation scripts handle virtual environment creation, pip upgrades, dependency installation, and server launching.
 
-## On Windows
-Simply double-click the execution batch file located in the root directory:
-```bash
-start_windows.bat
-```
-## On Linux / macOS
-1.Open your terminal in the project's root directory.
+Before everything, download the images that the project needs from [this link](https://drive.iust.ac.ir/index.php/s/AWw7GJBPaSkmrnx) and extract the `images` folder into the `static` directory.
 
-2.Grant executable permissions to the shell script:
-```bash
-chmod +x linux_start.sh
-```
-3.Run the script:
-```bash
-./linux_start.sh
-```
+To run this application, you only need to have **Docker** and **Docker Compose** installed on your system. There is no need to manually create virtual environments or install Python dependencies.
+
+### Prerequisites
+- Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for Windows or macOS) or Docker Engine (for Linux).
+
+### Running the Application
+
+1. Open your terminal (or Command Prompt/PowerShell on Windows) in the project's root directory.
+
+2. Run the following command to build the Docker image and start the full-stack container:
+   ```bash
+   docker compose up --build
